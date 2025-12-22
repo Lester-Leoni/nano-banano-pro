@@ -49,44 +49,47 @@ def save_to_history(task, prompt_en, prompt_ru):
     if len(st.session_state['history']) > 50:
         st.session_state['history'].pop()
 
-# --- 4. CSS СТИЛИ (MOBILE FIX) ---
+# --- 4. CSS СТИЛИ (MOBILE READY) ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
-    /* === 1. ГЛАВНЫЙ ФИКС ДЛЯ МОБИЛЬНЫХ === */
+    /* === 1. ГЛАВНЫЙ ФИКС МЕНЮ (РАБОТАЕТ НА ТЕЛЕФОНЕ) === */
     
-    /* Хедер должен быть ВИДИМЫМ, но ПРОЗРАЧНЫМ */
+    /* Делаем хедер прозрачным и убираем фон */
     [data-testid="stHeader"] {
         background: transparent !important;
-        pointer-events: none !important; /* Клики проходят сквозь пустое место */
-        visibility: visible !important; /* <--- ВОТ ЭТО ВЕРНУЛО КНОПКУ МЕНЮ */
-    }
-    
-    /* Сама кнопка меню должна нажиматься */
-    [data-testid="stHeader"] button {
-        pointer-events: auto !important;
-        color: #FFD700 !important; 
-        z-index: 99999 !important; /* Поверх всего */
+        /* НЕ ИСПОЛЬЗУЕМ pointer-events: none, это ломает тачскрины */
+        height: 3rem !important; /* Ограничиваем высоту, чтобы не перекрывать контент */
+        z-index: 1000 !important;
     }
 
-    /* Отступ сверху (на ПК) */
+    /* Красим кнопку меню в золото и делаем её видимой */
+    [data-testid="stHeader"] > button {
+        color: #FFD700 !important; 
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* Скрываем декоративную цветную полоску Streamlit сверху */
+    [data-testid="stDecoration"] {
+        display: none !important;
+    }
+
+    /* Скрываем меню "Deploy" и настройки справа */
+    [data-testid="stToolbar"] {
+        display: none !important;
+    }
+
+    /* === 2. ОТСТУПЫ === */
+    /* Увеличиваем отступ, чтобы кнопка меню не наезжала на заголовок */
     .main .block-container { 
-        padding-top: 6rem !important; 
+        padding-top: 4rem !important; 
         padding-bottom: 5rem !important;
     }
 
-    /* Защита от выделения в меню */
-    div[data-baseweb="select"], div[data-baseweb="menu"], li[role="option"] {
-        user-select: none !important;
-        -webkit-user-select: none !important;
-        cursor: pointer !important;
-    }
-
-    /* Скрываем лишнее (Github значок и футер) */
-    [data-testid="stToolbar"], [data-testid="stDecoration"], footer { display: none !important; }
-
-    /* === 2. ДИЗАЙН === */
+    /* === 3. ДИЗАЙН === */
 
     /* ФОНЫ */
     [data-testid="stAppViewContainer"] {
@@ -206,15 +209,30 @@ st.markdown("""
     
     .stTooltipIcon { color: #FFD700 !important; }
 
-    /* === АДАПТАЦИЯ ПОД МОБИЛЬНЫЕ ТЕЛЕФОНЫ === */
+    /* Защита от выделения в меню */
+    div[data-baseweb="select"], div[data-baseweb="menu"], li[role="option"] {
+        user-select: none !important;
+        -webkit-user-select: none !important;
+        cursor: pointer !important;
+    }
+
+    /* АДАПТАЦИЯ ПОД МОБИЛЬНЫЕ */
     @media only screen and (max-width: 600px) {
+        /* На телефоне хедеру даем чуть больше места, чтобы палец попадал в кнопку */
+        [data-testid="stHeader"] {
+            height: 4rem !important; 
+        }
+        /* Увеличиваем кнопку меню, чтобы легче нажать */
+        [data-testid="stHeader"] > button {
+            font-size: 1.2rem !important;
+        }
         .main .block-container { 
-            padding-top: 4rem !important; /* Меньше отступ сверху на телефоне */
+            padding-top: 3.5rem !important; /* Баланс между кнопкой и контентом */
             padding-left: 1rem !important;
             padding-right: 1rem !important;
         }
-        .main-banner h1 { font-size: 1.8rem !important; } /* Чуть меньше шрифт заголовка */
-        div.stButton > button p { font-size: 16px !important; } /* Кнопки чуть компактнее */
+        .main-banner h1 { font-size: 1.8rem !important; }
+        .main-banner p { font-size: 1rem !important; }
     }
     </style>
     """, unsafe_allow_html=True)
@@ -227,6 +245,7 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
+# ЗНАЧОК УБРАН
 with st.expander("Как пользоваться? (Нажмите, чтобы открыть)"):
     st.markdown("""
     1. **Выберите задачу** в меню слева.
@@ -276,7 +295,7 @@ VAR_MAP = {
     "room_type": "🏠 Какая комната?"
 }
 
-# --- ОБНОВЛЕННАЯ БАЗА ПРИМЕРОВ ---
+# --- ПОЛНАЯ БАЗА ПРИМЕРОВ ---
 EXAMPLES_DB = {
     "image_1": {"ph": "Вставьте ссылку (Ctrl+V) или опишите словами...", "help": "Основная картинка для обработки."},
     "image_2": {"ph": "Ссылка на вторую картинку...", "help": "Картинка, откуда берем лицо, одежду или стиль."},
@@ -306,6 +325,8 @@ EXAMPLES_DB = {
     "screen_type": {"ph": "Напр: Главная страница, Профиль, Корзина, Настройки...", "help": "Какой экран приложения рисуем?"},
     "room_type": {"ph": "Напр: Лофт-гостиная, Спальня в скандинавском стиле, Кухня...", "help": "Тип помещения для дизайна."},
     "design_style": {"ph": "Напр: Минимализм, Гранж, Лакшери...", "help": "Общий стиль дизайна."},
+    
+    # --- НОВЫЕ ПРИМЕРЫ (FIXED) ---
     "emotions": {"ph": "Напр: Доверие и надежность, Игривое, Премиальное...", "help": "Какое чувство должен вызывать логотип?"},
     "element_1": {"ph": "Напр: Огромный робот, Кот-космонавт...", "help": "Первый главный объект."},
     "element_2": {"ph": "Напр: Маленькая девочка с цветком, НЛО...", "help": "Второй объект."},
