@@ -53,7 +53,7 @@ def save_to_history(task, prompt_en, prompt_ru):
     if len(st.session_state['history']) > 50:
         st.session_state['history'].pop()
 
-# --- 4. CSS СТИЛИ ---
+# --- 4. CSS СТИЛИ (FIXED INPUT COLORS) ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -79,20 +79,49 @@ st.markdown("""
         padding-top: 1rem !important;
     }
 
-    /* ТЕКСТ */
+    /* ТЕКСТ ОБЩИЙ */
     h1, h2, h3, p, label, .stMarkdown, .stCaption, [data-testid="stSidebar"] label, [data-testid="stExpander"] p {
         color: #e0e0e0 !important;
         font-family: 'Inter', sans-serif !important; 
     }
 
-    /* UX FIXES */
+    /* --- ГЛАВНЫЙ ФИКС: ЦВЕТА ПОЛЕЙ ВВОДА --- */
+    
+    /* 1. Сами контейнеры полей */
+    div[data-baseweb="base-input"], div[data-baseweb="textarea"] {
+        background-color: #1a1a1a !important;
+        border: 1px solid #444 !important;
+    }
+
+    /* 2. ТЕКСТ, КОТОРЫЙ ПИШЕТ ЮЗЕР -> ЧИСТО БЕЛЫЙ */
+    div[data-baseweb="base-input"] input, 
+    div[data-baseweb="textarea"] textarea {
+        color: #ffffff !important;       /* Белый цвет текста */
+        -webkit-text-fill-color: #ffffff !important; /* Для Chrome/Safari */
+        caret-color: #FFD700 !important; /* Желтый курсор */
+        font-weight: 500 !important;
+    }
+
+    /* 3. ПОДСКАЗКА (Placeholder) -> СЕРЫЙ */
+    input::placeholder, textarea::placeholder {
+        color: #888888 !important;       /* Серый цвет примера */
+        -webkit-text-fill-color: #888888 !important;
+        opacity: 1 !important;
+        font-weight: 400 !important;
+    }
+
+    /* Активное состояние (фокус) */
+    div[data-baseweb="base-input"]:focus-within, 
+    div[data-baseweb="select"] > div:focus-within,
+    div[data-baseweb="textarea"]:focus-within {
+        border-color: #FFD700 !important; 
+        box-shadow: 0 0 0 1px #FFD700 !important;
+    }
+
+    /* --- UX: МЕНЮ КАК КНОПКА --- */
     div[data-baseweb="select"] { cursor: pointer !important; }
     div[data-baseweb="select"] * { cursor: pointer !important; user-select: none !important; -webkit-user-select: none !important; }
     
-    input::placeholder, textarea::placeholder {
-        color: #aaaaaa !important; opacity: 1 !important; -webkit-text-fill-color: #aaaaaa !important;
-    }
-
     /* ТАБЫ */
     button[data-baseweb="tab"] {
         border-radius: 8px !important;
@@ -117,22 +146,7 @@ st.markdown("""
     }
     div[data-baseweb="tab-highlight"] { display: none !important; }
 
-    /* ПОЛЯ ВВОДА */
-    input.st-ai, div[data-baseweb="select"] > div, div[data-baseweb="base-input"], div[data-baseweb="textarea"] {
-        background-color: #1a1a1a !important;
-        color: white !important;
-        border: 1px solid #444 !important;
-        font-family: 'Inter', sans-serif !important;
-    }
-    div[data-baseweb="base-input"]:focus-within, 
-    div[data-baseweb="select"] > div:focus-within, 
-    input:focus {
-        border-color: #FFD700 !important; 
-        box-shadow: 0 0 0 1px #FFD700 !important;
-        caret-color: #FFD700 !important;
-    }
-
-    /* КНОПКИ */
+    /* КНОПКИ ГЕНЕРАЦИИ */
     div.stButton > button, div.stFormSubmitButton > button {
         background-color: #FFD700 !important; 
         border: none !important;
@@ -272,7 +286,7 @@ VAR_MAP = {
     "room_type": "Какая комната?"
 }
 
-# --- ПОЛНАЯ БАЗА ПРИМЕРОВ ДЛЯ ЛЮДЕЙ ---
+# --- ПОЛНАЯ БАЗА ПРИМЕРОВ ---
 EXAMPLES_DB = {
     "image_1": {"ph": "Вставьте ссылку (Ctrl+V) или опишите словами...", "help": "Основная картинка для обработки."},
     "image_2": {"ph": "Ссылка на вторую картинку...", "help": "Картинка, откуда берем лицо, одежду или стиль."},
