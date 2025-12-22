@@ -1,205 +1,184 @@
 [
   {
     "id": "upscale_restore",
-    "title": "01. Улучшение качества (Re-Imagine)",
-    "description": "Перерисовывает изображение в высоком разрешении, сохраняя черты.",
-    "prompt_ru": "Создать высокодетализированную фотореалистичную версию изображения [image_1]. Критически важно: сохранить оригинальную композицию, позу и черты лица на 100%. Улучшить текстуру кожи, сделав её естественной (видны поры), устранить размытость и артефакты сжатия. Освещение должно быть идентично оригиналу. Результат — четкая фотография 8k.",
-    "prompt_en": "Generate a high-fidelity photorealistic recreation of [image_1]. Critical priority: strictly preserve the exact composition, pose, and facial identity of the original image. Enhance image quality by resolving blur and artifacts. Restore authentic skin texture with visible pores and natural subsurface scattering, avoiding a plastic look. Keep the original lighting and color grading exactly as they are. Output a sharp, 8k photography-quality image."
+    "title": "01. Улучшение качества (Upscale Pro)",
+    "description": "Профессиональный апскейл. Убирает размытость, восстанавливает микро-детали кожи.",
+    "prompt_ru": "Масштабировать и улучшить [image_1]. Приоритет: сохранение исходной идентичности и композиции. Устранить JPEG-артефакты и размытость. Восстановить естественную текстуру кожи (микропоры, не пушок), избегая эффекта «пластиковой маски». Повысить резкость глаз и волос. Освещение и цветокоррекция должны остаться оригинальными. Фотореалистичный результат 8k.",
+    "prompt_en": "Upscale and enhance [image_1]. Priority: strict fidelity to original identity and composition. Remove JPEG artifacts and blur. Restore authentic skin texture (visible pores, subsurface scattering), avoiding waxy/plastic smoothing. Sharpen eyes (iris details) and hair strands. Keep lighting and color grading 100% original. 8k photorealistic output."
   },
   {
     "id": "studio_portrait",
     "title": "02. Студийный портрет (High-End)",
     "description": "Портрет уровня обложки Vogue. Идеальный свет и кожа.",
-    "prompt_ru": "Профессиональный студийный портрет [person] на фоне [background]. Снято с ракурса [angle]. Освещение: [lighting]. Использовать объектив 85mm с диафрагмой f/1.8 для мягкого боке. Фокус строго на глазах. Текстура кожи должна быть ультра-реалистичной, с пушком и порами. Эстетика дорогого глянцевого журнала Vogue.",
-    "prompt_en": "A high-end editorial studio portrait of [person] set against a [background]. The shot is taken from a [angle] angle using an 85mm lens at f/1.8, creating a shallow depth of field with sharp focus on the eyes. Lighting setup: [lighting]. The skin texture must be ultra-detailed, showing realistic pores and vellus hair. Capture the aesthetic of a premium Vogue magazine cover in 8k resolution."
+    "prompt_ru": "High-end студийный портрет [person] на фоне [background]. Ракурс: [angle]. Схема освещения: [lighting]. Снято на 85mm объектив, диафрагма f/1.8. Глубина резкости, фокус на глазах. Текстура кожи ультра-детализированная. Эстетика дорогого глянцевого журнала.",
+    "prompt_en": "High-end editorial studio portrait of [person] against [background]. Camera angle: [angle]. Lighting setup: [lighting]. Shot on 85mm lens, f/1.8. Shallow depth of field, sharp focus on eyes. Ultra-detailed skin texture, realistic pores and vellus hair. Vogue magazine aesthetic, 8k resolution."
   },
   {
     "id": "scene_composition_complex",
-    "title": "03. Сложная композиция (Environment)",
+    "title": "03. Сложная композиция (Человек в среде)",
     "description": "Помещает персонажа в новое детальное окружение.",
-    "prompt_ru": "Фотомонтаж: Поместить персонажа с [image_1] в новое окружение: [background]. Добавить элементы фона: [additional_objects]. Атмосфера: [atmosphere]. Глобальное освещение должно объединять персонажа и фон, создавая правильные цветные рефлексы и тени. Фотореалистичный результат.",
-    "prompt_en": "Advanced photographic composite: Place the subject from [image_1] into a completely new environment: [background]. Integrate background elements: [additional_objects]. Atmosphere and weather: [atmosphere]. Ensure Global Illumination unifies the subject with the scene, casting accurate contact shadows and blending ambient colors onto the skin and clothing. The result must be indistinguishable from a real photograph."
-  },
-  {
-    "id": "expression_change",
-    "title": "04. Изменение эмоции",
-    "description": "Коррекция мимики с сохранением лица.",
-    "prompt_ru": "Изменить выражение лица человека на [image_1] на [emotion]. Строго сохранить узнаваемость (Identity) и остальные детали. Добавить естественные микровыражения (морщинки вокруг глаз, напряжение мышц).",
-    "prompt_en": "Modify the facial expression of the person in [image_1] to reflect [emotion]. It is crucial to strictly preserve the original Facial Identity and likeness. Introduce natural micro-expressions such as eye crinkles and realistic mouth shape adjustments suitable for this emotion."
+    "prompt_ru": "Композитинг: Поместить персонажа с [image_1] в новое окружение: [background]. Добавить на фон объекты: [additional_objects]. Атмосфера и погода: [atmosphere]. Критически важно: глобальное освещение (Global Illumination) должно связывать персонажа и фон. Правильные контактные тени на земле, цветовые рефлексы от окружения на коже и одежде. Фотореализм.",
+    "prompt_en": "Advanced Compositing: Place the character from [image_1] into a new environment: [background]. Add background elements: [additional_objects]. Atmosphere/Weather: [atmosphere]. Critical: Global Illumination must unify the subject and scene. Accurate contact shadows, ambient occlusion, and color bleeding/reflections from the environment onto the skin and clothes. Photorealistic."
   },
   {
     "id": "subject_swap",
-    "title": "05. Замена персонажа (Identity Swap)",
+    "title": "04. Замена персонажа (Identity Swap)",
     "description": "Вставляет нового героя в существующую сцену.",
-    "prompt_ru": "Заменить человека на [image_1] на персонажа [image_2] (или описание). Сохранить черты лица [image_2], но идеально вписать его в перспективу, масштаб и освещение сцены [image_1]. Цветокоррекция кожи должна соответствовать окружению.",
-    "prompt_en": "Replace the subject in [image_1] with the character from [image_2]. Strictly preserve the facial identity and features of [image_2]. The new character must perfectly match the perspective, scale, and lighting conditions of the original scene [image_1]. Apply color grading to the skin tone to ensure it interacts naturally with the environment's light."
+    "prompt_ru": "Заменить объект/человека на [image_1] на персонажа с [image_2]. Сохранить уникальные черты лица и идентичность с [image_2]. Новый персонаж должен идеально вписаться в перспективу, масштаб и освещение сцены [image_1]. Цветокоррекция кожи под окружение.",
+    "prompt_en": "Replace the subject in [image_1] with the character from [image_2]. Preserve facial identity and features from [image_2]. The new character must match the perspective, scale, and lighting conditions of [image_1] perfectly. Skin tone color grading to match the environment."
+  },
+  {
+    "id": "expression_change",
+    "title": "05. Изменение эмоции",
+    "description": "Коррекция мимики с сохранением лица.",
+    "prompt_ru": "Изменить эмоцию персонажа на [image_1] на [emotion]. Строго сохранить черты лица (Identity). Естественные микровыражения (морщинки вокруг глаз, положение губ).",
+    "prompt_en": "Change facial expression of person in [image_1] to [emotion]. Strictly preserve Facial Identity. Natural micro-expressions (eye crinkles, mouth shape)."
   },
   {
     "id": "cloth_swap",
-    "title": "06. Замена одежды (Virtual Try-On)",
+    "title": "06. Замена одежды (Fashion)",
     "description": "Меняет одежду, сохраняя позу и фигуру.",
-    "prompt_ru": "Одеть персонажа с [image_1] в наряд: [image_2] (или описание). Строго сохранить исходную позу и пропорции тела. Ткань должна реалистично облегать фигуру, создавая правильные складки и натяжение в зависимости от материала. Освещение на одежде должно совпадать со сценой.",
-    "prompt_en": "Digitally change the clothing on the subject in [image_1] to match the outfit from [image_2]. Strictly preserve the original pose and body proportions. The new fabric must drape physically accurately, showing realistic folds, tension, and weight appropriate for the material. Match the lighting and shadows on the new clothes to the original scene for a seamless integration."
+    "prompt_ru": "Заменить одежду на [image_1], надев на персонажа комплект с [image_2]. Строго сохранить позу и пропорции тела. Ткань должна реалистично облегать фигуру (драпировка, складки, натяжение) в соответствии с материалом. Освещение на одежде должно совпадать со сценой. Бесшовный монтаж.",
+    "prompt_en": "Swap clothing on [image_1] with the outfit from [image_2]. Strictly preserve original pose and body proportions. The fabric must drape physically accurately (folds, tension, weight) respecting the material properties. Match lighting on the new clothes to the original scene. Seamless photorealistic integration."
   },
   {
     "id": "object_removal",
-    "title": "07. Удаление объекта (Inpainting)",
-    "description": "Удаляет лишнее, интеллектуально дорисовывая фон.",
-    "prompt_ru": "Удалить [object] с изображения [image_1]. Заполнить пустоту фоном, используя контекстное понимание сцены (inpainting). Восстановить текстуры, шумы и освещение, чтобы не осталось следов редактирования. Чистая композиция.",
-    "prompt_en": "Remove the [object] from image [image_1]. Use context-aware inpainting to flawlessly fill the void. Reconstruct the background by matching the texture, noise grain, and lighting of the surrounding areas. Ensure there are no artifacts, ghosting, or seams. The result should look like a clean, original photograph."
+    "title": "07. Удаление объекта (Clean Plate)",
+    "description": "Удаляет лишнее, дорисовывая фон.",
+    "prompt_ru": "Удалить [object] с изображения [image_1]. Использовать Inpainting для заполнения пустоты. Фон должен быть восстановлен с учетом текстуры, шума и освещения соседних областей. Никаких следов или искажений. Чистая композиция.",
+    "prompt_en": "Remove [object] from [image_1]. Use context-aware inpainting to fill the void. The background must be reconstructed matching the texture, noise grain, and lighting of surrounding areas. No artifacts or ghosting. Clean plate composition."
   },
   {
     "id": "object_addition",
-    "title": "08. Добавление объекта (Product)",
+    "title": "08. Добавление объекта (Product Placement)",
     "description": "Внедряет предмет в сцену с тенями.",
-    "prompt_ru": "Вставить [object] в сцену [image_1]. Объект должен быть в правильной перспективе и масштабе. Обязательно создать реалистичную отбрасываемую тень и отражения окружения на поверхности объекта. Фотореализм.",
-    "prompt_en": "Insert a [object] into the scene [image_1]. Ensure the object aligns with the correct perspective and scale. Mandatory: render realistic cast shadows matching the light direction, and include ambient reflections on the object's surface. The composite must look photorealistic."
+    "prompt_ru": "Вставить [object] в сцену [image_1]. Объект должен иметь правильную перспективу и масштаб. Обязательно: отбрасываемая тень (Hard/Soft shadow) в зависимости от источника света, а также отражения окружения на поверхности объекта. Фотореализм.",
+    "prompt_en": "Insert [object] into the scene [image_1]. Ensure correct perspective and scale. Mandatory: cast shadows (matching light direction and hardness) and ambient reflections on the object's surface. Photorealistic composite."
   },
   {
     "id": "character_sheet",
     "title": "09. Лист персонажа (GameDev)",
     "description": "Генерация персонажа в трех ракурсах.",
-    "prompt_ru": "Создать профессиональный концепт-арт (Character Sheet) для персонажа: [character_description]. Компоновка: три ракурса в ряд (Вид спереди, Вид сбоку, Вид сзади). Нейтральный белый фон. Стиль: [style]. Равномерное освещение для 3D-моделирования. Высокая детализация костюма.",
-    "prompt_en": "Create a professional character design sheet for: [character_description]. Layout: Three distinct views side-by-side (Front view, Side view, Back view). Background: Neutral white. Style: [style]. Use even, flat lighting optimized for 3D modeling reference. Ensure high clarity of costume details and anatomy."
+    "prompt_ru": "Профессиональный концепт-арт лист персонажа (Character Sheet): [character_description]. Компоновка: три ракурса в ряд (Вид спереди, Вид сбоку, Вид сзади). Нейтральный белый фон. Стиль: [style]. Равномерное «плоское» освещение для моделирования. Четкие детали костюма.",
+    "prompt_en": "Professional character design sheet: [character_description]. Layout: Three views side-by-side (Front view, Side view, Back view). Neutral white background. Style: [style]. Even flat lighting optimized for 3D modeling. High clarity of costume details."
   },
   {
     "id": "sticker_pack",
-    "title": "10. Набор стикеров",
-    "description": "Пак стикеров с белой обводкой.",
-    "prompt_ru": "Набор стикеров (Sticker sheet) с персонажем: [character_description]. Эмоции: Счастье, Гнев, Шок, Любовь. Стиль: Векторная графика, яркие плоские цвета. Обязательно: широкая белая обводка (die-cut border) вокруг каждого стикера. Темный фон.",
-    "prompt_en": "A sticker sheet featuring [character_description]. Display multiple emotions/poses: Happy, Angry, Shocked, Love. Style: Vector graphic art with flat, vibrant colors. Mandatory: A thick white die-cut border surrounding each individual sticker. Isolated on a dark background."
+    "title": "10. Набор стикеров (Stickers)",
+    "description": "Пак стикеров с обводкой.",
+    "prompt_ru": "Набор стикеров (Sticker sheet) с персонажем: [character_description]. Разные эмоции: Счастье, Гнев, Шок, Любовь. Стиль: Векторная графика, плоские цвета. Обязательно: широкая белая обводка (Die-cut border) вокруг каждого стикера. Изолировано на темном фоне.",
+    "prompt_en": "Sticker sheet featuring [character_description]. Multiple emotions/poses: Happy, Angry, Shocked, Love. Style: Vector graphic, flat vibrant colors. Mandatory: Thick white die-cut border around each sticker. Isolated on dark background."
   },
   {
     "id": "ui_design",
-    "title": "11. Дизайн интерфейса (UI/UX)",
+    "title": "11. Дизайн интерфейса (Mobile UI)",
     "description": "Макет мобильного приложения.",
-    "prompt_ru": "Высококачественный дизайн интерфейса мобильного приложения для [industry_brand]. Экран: [screen_type]. Цветовая палитра: [colors]. Стиль: [design_style] (например, Clean, Minimal). Современная типографика без ошибок, трендовые иконки. Презентация в стиле Dribbble.",
-    "prompt_en": "High-fidelity Mobile App UI/UX design for [industry_brand]. Screen type: [screen_type]. Color palette: [colors]. Style: [design_style]. Use modern typography, pixel-perfect icons, and a user-centric layout. The design should look like a trending showcase on Dribbble or Behance."
+    "prompt_ru": "Дизайн интерфейса мобильного приложения (UI/UX) для [industry_brand]. Экран: [screen_type]. Цветовая палитра: [colors]. Стиль: [design_style] (напр. Clean, Minimal, Glassmorphism). Современная типографика, трендовые иконки. Презентация в стиле Dribbble/Behance.",
+    "prompt_en": "High-fidelity Mobile App UI/UX design for [industry_brand]. Screen type: [screen_type]. Color palette: [colors]. Style: [design_style]. Modern typography, pixel-perfect icons, user-centric layout. Trending on Dribbble/Behance."
   },
   {
     "id": "interior_design",
-    "title": "12. Интерьерный дизайн",
-    "description": "Визуализация помещений.",
-    "prompt_ru": "Фотореалистичная визуализация интерьера: [room_type]. Стиль: [design_style]. Цвета: [colors]. Основные материалы: [materials]. Естественное дневное освещение. Ракурс: [angle]. Качество уровня журнала Architectural Digest.",
-    "prompt_en": "Photorealistic interior design visualization of a [room_type]. Style: [design_style]. Color palette: [colors]. Key materials: [materials]. Lighting: Soft natural daylight creating a cozy atmosphere. Camera angle: [angle]. Render quality comparable to Architectural Digest photography, 8k."
+    "title": "12. Интерьерный дизайн (ArchViz)",
+    "description": "Визуализация помещений и архитектуры.",
+    "prompt_ru": "Фотореалистичная визуализация интерьера: [room_type]. Стиль: [design_style]. Цвета: [colors]. Материалы: [materials]. Естественное дневное освещение, уютная атмосфера. Ракурс: [angle]. Уровень Architectural Digest, 8k.",
+    "prompt_en": "Photorealistic interior design visualization of a [room_type]. Style: [design_style]. Color palette: [colors]. Key materials: [materials]. Natural daylight, cozy atmosphere. Camera angle: [angle]. Architectural Digest quality, 8k render."
   },
   {
     "id": "mockup_generation",
-    "title": "13. Создание мокапа (Mockup)",
+    "title": "13. Создание мокапа (Product)",
     "description": "Натягивает дизайн на реальный объект.",
-    "prompt_ru": "Профессиональный продуктовый мокап. Наложить дизайн на 3D-модель [object_type]. Фон: [background_type]. Учесть изгибы поверхности, текстуру материала и блики. Студийный свет. Рекламный вид.",
-    "prompt_en": "Professional product mockup. Map the provided design onto a realistic 3D model of a [object_type]. Background: [background_type]. Accurate surface curvature, material texture, and specular highlights. Studio lighting. Commercial product photography look."
+    "prompt_ru": "Профессиональный продуктовый мокап. Наложить этот дизайн на 3D-модель [object_type]. Фон: [background_type]. Учесть кривизну поверхности, текстуру материала и блики. Студийный свет. Выглядит как готовый рекламный шот.",
+    "prompt_en": "Professional product mockup. Map this design onto a 3D model of [object_type]. Background: [background_type]. Respect surface curvature, material texture, and specular highlights. Studio lighting. Commercial product photography look."
   },
   {
     "id": "knolling_photography",
-    "title": "14. Кноллинг (Knolling)",
-    "description": "Аккуратная раскладка предметов.",
-    "prompt_ru": "Фотография в стиле Кноллинг (Knolling) для [object]. Предметы аккуратно разложены по сетке под прямым углом. Фон: [background]. Вид строго сверху. Мягкое бестеневое освещение. Высокая резкость.",
-    "prompt_en": "Knolling style photography featuring [object]. Items are neatly arranged in a grid pattern at 90-degree angles. Background: [background]. View: Strict top-down. Lighting: Soft and shadowless. High sharpness and organized aesthetic."
+    "title": "14. Кноллинг / Флэтлей (Knolling)",
+    "description": "Эстетичная раскладка предметов под прямым углом.",
+    "prompt_ru": "Фотография в стиле Кноллинг (Knolling) для [object]. Предметы аккуратно разложены по сетке под прямым углом. Фон: [background]. Вид строго сверху (Top-down). Мягкое бестеневое освещение. Высокая резкость, эстетика порядка.",
+    "prompt_en": "Knolling style photography of [object]. Items neatly arranged in a grid at right angles. Background: [background]. Strict Top-down view. Soft shadowless lighting. High sharpness, organized aesthetic."
   },
   {
     "id": "seamless_pattern",
-    "title": "15. Бесшовный паттерн",
+    "title": "15. Бесшовный паттерн (Texture)",
     "description": "Узор для печати или фонов.",
-    "prompt_ru": "Бесшовный повторяющийся паттерн. Тема: [imagery]. Стиль: [style]. Цвета: [colors]. Плоский вид 2D, без теней и перспективы. Готов к печати на ткани.",
-    "prompt_en": "A seamless, tileable repeating pattern. Theme: [imagery]. Style: [style]. Colors: [colors]. Flat 2D vector view, no shadows, no perspective. Ready for textile printing or wallpaper."
+    "prompt_ru": "Бесшовный повторяющийся паттерн (Seamless Pattern). Тема: [imagery]. Стиль: [style]. Цвета: [colors]. Плоский вид 2D, без теней и перспективы. Готов к печати на ткани или обоях.",
+    "prompt_en": "Seamless repeating tileable pattern. Theme: [imagery]. Style: [style]. Colors: [colors]. Flat 2D view, no shadows, no perspective. Ready for textile printing or wallpaper."
   },
   {
     "id": "logo_creative",
-    "title": "16. Логотип (Creative)",
+    "title": "16. Логотип (Creative Design)",
     "description": "Разработка уникального логотипа.",
-    "prompt_ru": "Векторный дизайн логотипа для [industry_brand]. Образ: [imagery]. Настроение: [emotions]. Цвета: [colors]. Стиль: [style]. Белый фон. Чистые линии, минимализм.",
-    "prompt_en": "Vector logo design for [industry_brand]. Core Imagery: [imagery]. Vibe: [emotions]. Colors: [colors]. Style: [style] (e.g. Minimalist, Mascot, Geometric). Solid white background. Clean lines, professional branding."
-  },
-  {
-    "id": "logo_stylization",
-    "title": "17. Стилизация логотипа (3D)",
-    "description": "Логотип из предметов.",
-    "prompt_ru": "Редизайн логотипа [image_1]. Выложить форму знака, используя реалистичные [objects]. Вид сверху, мягкие тени, белый фон. Фотореализм.",
-    "prompt_en": "Logo redesign of [image_1]. Construct the shape using photorealistic [objects]. Top-down view, soft shadows, white background. Photorealistic rendering."
+    "prompt_ru": "Векторный дизайн логотипа для [industry_brand]. Метафора/Образ: [imagery]. Настроение: [emotions]. Цвета: [colors]. Стиль: [style] (напр. Минимализм, Маскот, Геометрия). Белый фон. Чистые линии.",
+    "prompt_en": "Vector logo design for [industry_brand]. Core Imagery: [imagery]. Vibe: [emotions]. Colors: [colors]. Style: [style] (e.g. Minimalist, Mascot, Geometric). Solid white background. Clean lines."
   },
   {
     "id": "text_design",
-    "title": "18. Текстовый дизайн (Typography)",
+    "title": "17. Текстовый дизайн (Typography)",
     "description": "Баннеры с красивым шрифтом.",
-    "prompt_ru": "Типографический постер для [brand]. Текст: «[text]». Шрифт: [font_style]. Графический стиль: [design_style]. Цвета: [colors]. Векторная четкость, идеальная читаемость текста.",
-    "prompt_en": "Typography poster design for [brand]. Feature the text \"[text]\" clearly and legibly. Font choice: [font_style]. Graphic style: [design_style]. Colors: [colors]. Vector sharpness, high readability, professional kerning and composition."
+    "prompt_ru": "Типографический постер для [brand]. Центральный текст: «[text]». Шрифт: [font_style]. Графический стиль: [design_style]. Цвета: [colors]. Векторная четкость, читаемость, профессиональный кернинг.",
+    "prompt_en": "Typography poster design for [brand]. Feature text: \"[text]\". Font choice: [font_style]. Graphic style: [design_style]. Colors: [colors]. Vector sharpness, high readability, professional kerning."
   },
   {
     "id": "product_card",
-    "title": "19. Карточка товара (Marketplace)",
-    "description": "Продающая инфографика.",
-    "prompt_ru": "Дизайн карточки товара для маркетплейса на основе [image_1]. Добавить инфографику с преимуществами: [features_list]. Стиль: Коммерческий, яркий, [design_style]. Пропорции [aspect_ratio]. Крупный читаемый текст.",
-    "prompt_en": "E-commerce product card design based on [image_1]. Incorporate infographics highlighting these features: [features_list]. Style: Commercial, vibrant, [design_style]. Aspect ratio [aspect_ratio]. Focus on the product with large, readable typography."
+    "title": "18. Карточка товара (E-commerce)",
+    "description": "Продающая инфографика для маркетплейсов.",
+    "prompt_ru": "Дизайн карточки товара для маркетплейса на основе [image_1]. Добавить инфографику с преимуществами: [features_list]. Стиль: Коммерческий, яркий, [design_style]. Пропорции [aspect_ratio]. Акцент на продукте, крупный читаемый текст.",
+    "prompt_en": "E-commerce product card design based on [image_1]. Incorporate infographics highlighting features: [features_list]. Style: Commercial, vibrant, [design_style]. Aspect ratio [aspect_ratio]. Product focus, large readable typography."
   },
   {
     "id": "youtube_thumbnail",
-    "title": "20. Обложка YouTube (Viral)",
-    "description": "Кликбейтное превью с эмоциями.",
-    "prompt_ru": "YouTube превью: заменить лицо на [image_1] лицом [face_description_or_image_2]. Эмоция: Шокированное/Радостное. Заменить заголовок на текст «[text]». Яркие, насыщенные цвета, высокий контраст, вирусный стиль.",
-    "prompt_en": "YouTube thumbnail editing: swap the face in [image_1] with [face_description_or_image_2]. Expression: Shocked/Excited. Change the title text to read \"[text]\". Use vibrant colors, high contrast, and a viral content aesthetic."
+    "title": "19. Обложка YouTube (Thumbnail)",
+    "description": "Кликбейтное превью с заменой лица.",
+    "prompt_ru": "YouTube превью: заменить лицо на [image_1] лицом [face_description_or_image_2]. Выражение лица: Шокированное/Радостное. Заменить текст заголовка на «[text]». Яркие, насыщенные цвета, высокий контраст, стиль MrBeast.",
+    "prompt_en": "YouTube thumbnail editing: swap face in [image_1] with [face_description_or_image_2]. Expression: Shocked/Excited. Change title text to \"[text]\". Vibrant colors, high contrast, viral aesthetic."
   },
   {
     "id": "image_restyling",
-    "title": "21. Стилизация (Art Filter)",
-    "description": "Превращает фото в картину.",
-    "prompt_ru": "Перерисовать [image_1] в художественном стиле [style]. Сохранить композицию, но полностью изменить технику исполнения. Имитация материалов: [materials] (напр. Масло, Акварель).",
-    "prompt_en": "Restyle [image_1] into the artistic style of: [style]. Preserve the original composition and silhouettes but completely change the rendering technique. Medium simulation: [materials] (e.g. Oil paint, Watercolor, Pencil sketch)."
+    "title": "20. Стилизация (Art Filter)",
+    "description": "Превращает фото в картину или рисунок.",
+    "prompt_ru": "Перерисовать [image_1] в художественном стиле [style]. Сохранить композицию и силуэты, но полностью изменить технику исполнения. Имитация мазков/штрихов: [materials] (напр. Масло, Акварель, Карандаш).",
+    "prompt_en": "Restyle [image_1] into artistic style: [style]. Preserve composition and silhouettes but completely change the rendering technique. Medium simulation: [materials] (e.g. Oil paint, Watercolor, Pencil sketch)."
   },
   {
     "id": "sketch_to_photo",
-    "title": "22. Скетч в Фото (Render)",
+    "title": "21. Скетч в Фото (Render)",
     "description": "Визуализация наброска в реализм.",
-    "prompt_ru": "Превратить скетч [image_1] в фотореалистичное изображение. Стиль: [style]. Материалы: [materials]. Кинематографичное освещение, 8k render. Строго следовать линиям скетча.",
-    "prompt_en": "Render the sketch [image_1] into a photorealistic image. Style: [style]. Object materials: [materials]. Cinematic lighting, 8k render. Strictly adhere to the sketch outlines and forms."
+    "prompt_ru": "Превратить скетч [image_1] в фотореалистичное изображение. Стиль: [style]. Материалы объектов: [materials]. Кинематографичное освещение, 8k render. Строго следовать линиям скетча.",
+    "prompt_en": "Render sketch [image_1] into a photorealistic image. Style: [style]. Object materials: [materials]. Cinematic lighting, 8k render. Strictly adhere to sketch outlines."
   },
   {
     "id": "visual_infographic",
-    "title": "23. Инфографика (Expert)",
+    "title": "22. Инфографика (Expert)",
     "description": "Экспертный контент с тезисами.",
-    "prompt_ru": "Профессиональная инфографика на основе [image_1]. Заголовок: «[text]». Пункты списка: [features_list]. Дизайн: [design_style], цвета [colors]. Текст не должен перекрывать важные детали. Деловая эстетика.",
-    "prompt_en": "Professional infographic using [image_1] as the base. Title: \"[text]\". Bullet points content: [features_list]. Design style: [design_style], color palette [colors]. Ensure text does not overlap key visual elements. Business aesthetic."
+    "prompt_ru": "Профессиональная инфографика на основе [image_1]. Заголовок: «[text]». Список пунктов: [features_list]. Дизайн: [design_style], цвета [colors]. Текст не должен перекрывать лицо спикера. Деловая эстетика.",
+    "prompt_en": "Professional infographic using [image_1] as base. Title: \"[text]\". Bullet points: [features_list]. Design: [design_style], colors [colors]. Ensure text does not overlap the speaker's face. Business aesthetic."
   },
   {
     "id": "element_combine",
-    "title": "24. Комбинирование (Collage)",
+    "title": "23. Комбинирование (Collage)",
     "description": "Соединяет элементы двух фото.",
     "prompt_ru": "Бесшовный коллаж: поместить [element_from_image_2] поверх [element_from_image_1]. Учесть перспективу и физику наложения. Объекты должны выглядеть как единое целое.",
-    "prompt_en": "Seamless collage: Place [element_from_image_2] onto [element_from_image_1]. Respect perspective and layering physics. The objects must blend coherently into a single scene."
+    "prompt_en": "Seamless collage: place [element_from_image_2] onto [element_from_image_1]. Respect perspective and layering physics. Objects must blend coherently."
+  },
+  {
+    "id": "logo_stylization",
+    "title": "24. Стилизация логотипа (3D)",
+    "description": "Логотип из предметов или материалов.",
+    "prompt_ru": "Редизайн логотипа [image_1]. Выложить форму букв/знака, используя реалистичные [objects]. Вид сверху, мягкие тени, белый фон. Фотореализм.",
+    "prompt_en": "Logo redesign of [image_1]. Construct the shape using photorealistic [objects]. Top-down view, soft shadows, white background. Photorealism."
   },
   {
     "id": "comic_page",
     "title": "25. Страница комикса",
     "description": "Создание сюжетной страницы.",
-    "prompt_ru": "Страница комикса. Стиль: [style]. Сцена: [situation] с персонажем [character_description]. Динамичные кадры, облачка с текстом, драматичные тени.",
+    "prompt_ru": "Страница комикса. Стиль: [style] (напр. Marvel, Manga, Noir). Сценарий: [situation] с персонажем [character_description]. Динамичные кадры, облачка с текстом, драматичные тени.",
     "prompt_en": "Comic book page. Style: [style]. Scene: [situation] featuring [character_description]. Dynamic panels, speech bubbles, dramatic shadows."
   },
   {
     "id": "scene_composite",
     "title": "26. Общая сцена (Composite)",
-    "description": "Сборка сложной сцены.",
+    "description": "Сборка сложной сцены из элементов.",
     "prompt_ru": "Создать единую сцену, объединив [element_1] и [element_2]. Описание сцены: [scene_description]. Выровнять баланс белого, зернистость и фокусное расстояние.",
-    "prompt_en": "Create a unified scene merging [element_1] and [element_2]. Scene description: [scene_description]. Match white balance, film grain, and focal length for consistency."
-  },
-  {
-    "id": "storyboard_gen",
-    "title": "27. Раскадровка (Storyboard)",
-    "description": "Создает последовательность кадров для видео.",
-    "prompt_ru": "Кинематографическая раскадровка (Storyboard) из 4 кадров для сцены: [scene_description]. Стиль: [style] (например, черно-белый скетч, цветной концепт). Кадры должны показывать развитие действия. Подписи под кадрами.",
-    "prompt_en": "Cinematic storyboard consisting of 4 panels depicting the scene: [scene_description]. Style: [style] (e.g., black and white sketch, digital painting). The panels must show the progression of action. Include short captions."
-  },
-  {
-    "id": "technical_blueprint",
-    "title": "28. Технический чертеж (Blueprint)",
-    "description": "Схематичное изображение устройства.",
-    "prompt_ru": "Детальный технический чертеж [object]. Стиль: Синька (Blueprint) или патентная иллюстрация. Белые линии на синем фоне. Выноски с текстом, размеры, вид в разрезе. Высокая инженерная точность.",
-    "prompt_en": "Detailed technical blueprint of [object]. Style: Classic Blueprint or Patent Illustration. White lines on a blue grid background. Include text annotations, dimensions, and a cross-section view. High engineering precision."
-  },
-  {
-    "id": "neon_cyberpunk",
-    "title": "29. Неоновый Киберпанк",
-    "description": "Атмосферный ночной город.",
-    "prompt_ru": "Футуристическая сцена в стиле Киберпанк с участием [subject]. Окружение: ночной дождливый город, неоновые вывески (цвета: [colors]). Отражения на мокром асфальте. Кинематографичный свет, дымка, объемный свет.",
-    "prompt_en": "Futuristic Cyberpunk scene featuring [subject]. Environment: Rainy night city, glowing neon signs (colors: [colors]). Reflections on wet asphalt. Cinematic lighting, atmospheric haze, volumetric light rays."
+    "prompt_en": "Create a unified scene merging [element_1] and [element_2]. Scene description: [scene_description]. Match white balance, film grain, and focal length."
   }
 ]
