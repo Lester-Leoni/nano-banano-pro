@@ -37,7 +37,50 @@ components.html(
     height=0,
 )
 
-# --- 3. HISTORY ---
+# --- 3. NEGATIVE PROMPT LIBRARY ---
+NEG_GROUPS = {
+    1: { # Фотореализм и Люди
+        "Mini": {"en": "plastic skin, beauty retouch, identity drift, extra fingers, watermark, text", "ru": "пластиковая кожа, бьюти-ретушь, потеря сходства, лишние пальцы, водяной знак, текст"},
+        "Plus": {"en": "waxy/plastic skin, over-smoothing, beauty retouch, face reshape, identity drift, extra teeth, extra fingers, deformed hands, watermark, text", "ru": "восковая кожа, пересглаживание, бьюти-ретушь, изменение лица, потеря сходства, лишние зубы/пальцы, деформация рук, водяной знак, текст"},
+        "Full": {"en": "waxy/plastic skin, over-smoothing, beauty retouch, face reshaping, identity drift, uncanny face, extra teeth, deformed hands, extra limbs/fingers, AI glow, over-sharpen halos, heavy noise, color banding, extra text, watermark, logo", "ru": "восковая/пластиковая кожа, пересглаживание, бьюти-ретушь, изменение черт лица, потеря сходства, жуткое лицо, лишние зубы, деформированные руки, лишние конечности, AI-свечение, ореолы перешарпа, сильный шум, цветовые полосы, лишний текст, водяной знак, логотип"}
+    },
+    2: { # Редактирование сцены
+        "Mini": {"en": "seams, halos, ghosting, wrong shadow, wrong scale, watermark, text", "ru": "швы, ореолы, двоение, неверные тени, неверный масштаб, водяной знак, текст"},
+        "Plus": {"en": "seams, halos, cutout edges, ghosting, smear, warped lines, floating object, wrong shadow, wrong scale, mismatch grain, watermark, text", "ru": "швы, ореолы, обрезанные края, двоение, размазывание, кривые линии, левитирующие объекты, неверные тени, неверный масштаб, разное зерно, водяной знак, текст"},
+        "Full": {"en": "seams, halos, cutout edges, ghosting, smearing, warped perspective/lines, floating objects, wrong scale, wrong shadows, inconsistent lighting, mismatch grain/noise, color mismatch, reflections missing/incorrect, blur artifacts, extra text, watermark, logo", "ru": "швы, ореолы, обрезанные края, двоение, размазывание, искаженная перспектива, левитирующие объекты, неверный масштаб/тени, несоответствие света/зерна/цвета, ошибки отражений, артефакты размытия, лишний текст, водяной знак, логотип"}
+    },
+    3: { # Коммерческий дизайн
+        "Mini": {"en": "misspelling, broken glyphs, lorem ipsum, tiny text, random logo, watermark", "ru": "опечатки, битые символы, lorem ipsum, мелкий текст, случайный логотип, водяной знак"},
+        "Plus": {"en": "misspelling, broken glyphs, lorem ipsum, tiny unreadable text, clutter, misaligned layout, low-contrast text, pixelation, random logo, watermark", "ru": "опечатки, битые символы, lorem ipsum, нечитаемый текст, мусор, кривая верстка, низкий контраст, пикселизация, случайный логотип, водяной знак"},
+        "Full": {"en": "misspelling, broken glyphs, lorem ipsum, tiny unreadable text, clutter, misaligned layout, low contrast text, pixelation, jagged edges, wrong aspect ratio, random brand/logo, watermark, extra QR codes, illegible icons", "ru": "опечатки, битые символы, lorem ipsum, мелкий нечитаемый текст, визуальный мусор, кривая верстка, низкий контраст, пикселизация, рваные края, неверные пропорции, случайный бренд/логотип, водяной знак, лишние QR-коды, неразборчивые иконки"}
+    },
+    4: { # Арт и Иллюстрация
+        "Mini": {"en": "extra objects, anatomy warp, style drift, seams, vignette, watermark, text", "ru": "лишние объекты, искажение анатомии, плавающий стиль, швы, виньетка, водяной знак, текст"},
+        "Plus": {"en": "extra objects, anatomy warp, proportion change, perspective distortion, messy linework, style drift, pattern seams, vignette, unreadable text, watermark", "ru": "лишние объекты, искажение анатомии, нарушение пропорций, искажение перспективы, неряшливые линии, плавающий стиль, швы, виньетка, нечитаемый текст, водяной знак"},
+        "Full": {"en": "extra objects, anatomy warp, proportion changes, perspective distortion, messy linework, inconsistent style, seams in pattern, vignette, shading when flat is required, unreadable text/gibberish, watermark, logo", "ru": "лишние объекты, искажение анатомии, нарушение пропорций, искажение перспективы, неряшливые линии, непоследовательный стиль, швы в паттерне, виньетка, лишние тени, нечитаемый текст, водяной знак, логотип"}
+    },
+    5: { # Архитектура
+        "Mini": {"en": "keystone distortion, warped verticals, messy geometry, unrealistic scale, watermark, text", "ru": "искажение трапеции, кривые вертикали, грязная геометрия, нереальный масштаб, водяной знак, текст"},
+        "Plus": {"en": "keystone distortion, warped verticals, bent walls, unrealistic scale, messy geometry, low-res textures, blown highlights, muddy shadows, clutter, watermark", "ru": "искажение трапеции, кривые вертикали/стены, нереальный масштаб, грязная геометрия, текстуры низкого разрешения, пересветы, грязные тени, мусор, водяной знак"},
+        "Full": {"en": "keystone distortion, bent walls, warped verticals, unrealistic scale, messy geometry, low-res textures, over-sharpen halos, blown highlights, muddy shadows, clutter, people/characters (if not requested), extra text, watermark, logo", "ru": "искажение трапеции, кривые стены, заваленные вертикали, нереалистичный масштаб, грязная геометрия, текстуры низкого разрешения, ореолы перешарпа, пересветы, грязные тени, мусор, лишние люди, текст, водяной знак"}
+    },
+    6: { # Спецэффекты и Кино
+        "Mini": {"en": "overdone flares, heavy aberration, excessive bloom, noisy artifacts, watermark, text", "ru": "перебор с бликами, сильная аберрация, избыточное свечение, шум, водяной знак, текст"},
+        "Plus": {"en": "excessive bloom, heavy chromatic aberration, overdone flares, crushed blacks, blown highlights, noisy artifacts, oversharpen halos, plastic skin, watermark, text", "ru": "избыточное свечение, сильная аберрация, перебор с бликами, проваленные черные, пересветы, шумные артефакты, перешарп, пластиковая кожа, водяной знак, текст"},
+        "Full": {"en": "overdone bloom, heavy chromatic aberration, excessive lens flares, crushed blacks, blown highlights, noisy artifacts, oversharpen halos, plastic skin, unreadable text, tiny clutter text, watermark, logo", "ru": "перебор с bloom, сильная аберрация, избыточные блики, проваленные черные, пересветы, шумные артефакты, ореолы перешарпа, пластиковая кожа, нечитаемый текст, мелкий мусор, водяной знак, логотип"}
+    }
+}
+
+ID_TO_GROUP = {
+    "upscale_restore": 1, "studio_portrait": 1, "background_change": 1, "face_swap": 1, "expression_change": 1, "cloth_swap": 1,
+    "object_removal": 2, "object_addition": 2, "scene_relighting": 2, "scene_composite": 2,
+    "product_card": 3, "mockup_generation": 3, "knolling_photography": 3, "logo_creative": 3, "logo_stylization": 3, "ui_design": 3, "text_design": 3,
+    "image_restyling": 4, "sketch_to_photo": 4, "character_sheet": 4, "sticker_pack": 4, "comic_page": 4, "seamless_pattern": 4,
+    "interior_design": 5, "architecture_exterior": 5, "isometric_room": 5,
+    "youtube_thumbnail": 6, "cinematic_atmosphere": 6, "technical_blueprint": 6, "macro_extreme": 6
+}
+
+# --- 4. HISTORY ---
 if 'history' not in st.session_state:
     st.session_state['history'] = []
 
@@ -53,27 +96,19 @@ def save_to_history(task, prompt_en, prompt_ru):
     if len(st.session_state['history']) > 50:
         st.session_state['history'].pop()
 
-# --- 4. CSS (VISUAL FIXES + TRANSPARENT HEADER) ---
+# --- 5. CSS (VISUAL FIXES) ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
-/* =========================================================
-   🍌 HEADER & ARROW FIXES
-   ========================================================= */
-
-/* 1. Делаем хедер полностью прозрачным */
+/* HEADER & ARROW */
 header[data-testid="stHeader"] {
     background: transparent !important;
     background-color: transparent !important;
     border-bottom: none !important;
     box-shadow: none !important;
 }
-
-/* 2. Удаляем цветную полоску декорации */
 [data-testid="stDecoration"] { display: none !important; }
-
-/* 3. Красим стрелочку (кнопку сайдбара) в ЗОЛОТО */
 button[data-testid="stSidebarCollapsedControl"] {
     color: #FFD700 !important;
     border: none !important;
@@ -83,26 +118,11 @@ button[data-testid="stSidebarCollapsedControl"]:hover {
     color: #FFC300 !important;
     background: transparent !important;
 }
-
-/* 4. Меню "три точки" справа сверху */
-div[data-testid="stToolbar"] {
-    right: 2rem;
-    top: 0.5rem;
-}
-
-/* Скрываем футер */
+div[data-testid="stToolbar"] { right: 2rem; top: 0.5rem; }
 footer { display: none !important; }
+.main .block-container { padding-top: 3rem !important; }
 
-/* Сдвигаем контент чуть выше */
-.main .block-container { 
-    padding-top: 3rem !important; 
-}
-
-/* =========================================================
-   ⬇️ ОСНОВНОЙ ВИЗУАЛ
-   ========================================================= */
-
-/* ФОНЫ */
+/* THEME */
 [data-testid="stAppViewContainer"] {
     background-color: #0e0e0e;
     background-image: 
@@ -116,14 +136,12 @@ footer { display: none !important; }
     background-image: linear-gradient(180deg, #1a1a1a 0%, #111111 100%) !important;
     padding-top: 1rem !important;
 }
-
-/* ТЕКСТ ОБЩИЙ */
 h1, h2, h3, p, label, .stMarkdown, .stCaption, [data-testid="stSidebar"] label, [data-testid="stExpander"] p {
     color: #e0e0e0 !important;
     font-family: 'Inter', sans-serif !important; 
 }
 
-/* ПОЛЯ ВВОДА */
+/* INPUTS */
 div[data-baseweb="base-input"], div[data-baseweb="textarea"] {
     background-color: #1a1a1a !important;
     border: 1px solid #444 !important;
@@ -148,11 +166,7 @@ div[data-baseweb="textarea"]:focus-within {
     box-shadow: 0 0 0 1px #FFD700 !important;
 }
 
-/* МЕНЮ КАК КНОПКА */
-div[data-baseweb="select"] { cursor: pointer !important; }
-div[data-baseweb="select"] * { cursor: pointer !important; user-select: none !important; -webkit-user-select: none !important; }
-
-/* ТАБЫ */
+/* TABS */
 button[data-baseweb="tab"] {
     border-radius: 8px !important;
     margin-right: 6px !important;
@@ -176,7 +190,7 @@ button[data-baseweb="tab"][aria-selected="true"] div p {
 }
 div[data-baseweb="tab-highlight"] { display: none !important; }
 
-/* КНОПКИ */
+/* BUTTONS */
 div.stButton > button, div.stFormSubmitButton > button {
     background-color: #FFD700 !important; 
     border: none !important;
@@ -184,7 +198,7 @@ div.stButton > button, div.stFormSubmitButton > button {
     transition: all 0.3s ease !important;
     width: 100% !important;   
     border-radius: 8px !important; 
-    color: #000000 !important; /* Черный текст на кнопках */
+    color: #000000 !important;
 }
 div.stButton > button p, div.stFormSubmitButton > button p {
     color: #000000 !important; 
@@ -213,7 +227,7 @@ div.stButton > button:hover p, div.stFormSubmitButton > button:hover p { color: 
 }
 .main-banner h1 { color: #FFD700 !important; }
 
-/* SIDEBAR FIRST BUTTON (PRO MENU) STYLE */
+/* SIDEBAR PRO BUTTON */
 [data-testid="stSidebar"] .stButton:first-child > button {
     width: 100%;
     background-color: #FFD700 !important;
@@ -225,11 +239,10 @@ div.stButton > button:hover p, div.stFormSubmitButton > button:hover p { color: 
     border: none !important;
     box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
-
 </style>
 """, unsafe_allow_html=True)
 
-# --- 5. BANNER ---
+# --- 6. BANNER & INSTRUCTIONS ---
 st.markdown("""
     <div class="main-banner">
         <h1>🍌 Nano Banano Pro</h1>
@@ -237,16 +250,33 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-with st.expander("Как пользоваться? (Нажмите, чтобы открыть)"):
+with st.expander(":material/info: Инструкция: Как пользоваться и что значат кнопки?"):
     st.markdown("""
+    ### :material/bolt: Быстрый старт
     1. **Выберите задачу** в меню слева.
-    2. **Заполните поля** (или просто следуйте примерам).
-    3. Нажмите кнопку **"🍌 Сгенерировать Промпт"**.
-    4. Скопируйте результат и отправьте в нейросеть.
+    2. **Заполните поля** (или оставьте пустые для теста).
+    3. **Выберите режим Негатива** (см. ниже).
+    4. Нажмите кнопку **"🍌 Сгенерировать Промпт"**.
+
+    ---
+    
+    ### :material/tune: Режимы Негатива (Negative Prompt)
+    *Выбирайте, насколько жестко нужно фильтровать ошибки нейросети:*
+    * :material/filter_1: **Mini (Легкий):** Используйте, если модель "забывает" рисовать главное из-за кучи ограничений. Минимум запретов.
+    * :material/filter_2: **Default (Mini+):** **Рекомендуется.** Золотая середина. Убирает плохую кожу, лишние пальцы и водяные знаки.
+    * :material/filter_3: **Aggressive (Full):** Включайте, если нейросеть упорно выдает артефакты, кривые лица или "пластиковую" картинку. Максимальная зачистка.
+
+    ---
+
+    ### :material/content_copy: Как копировать результат?
+    * :material/rocket_launch: **Кнопка "Всё в одном" (Для Ботов):** Идеально для **Midjourney**, Telegram-ботов и Discord.  
+      *Автоматически добавляет команду `--no` перед негативом.*
+        
+    * :material/build: **Кнопки "Раздельно" (Для WebUI):** Используйте для **Stable Diffusion (A1111, ComfyUI)**, Leonardo AI и других сайтов, где есть отдельные поля для "Positive" и "Negative".
     """)
 st.write("---") 
 
-# --- 6. DATA DICTS (UPDATED FOR NEW PROMPTS) ---
+# --- 7. DATA DICTS ---
 VAR_MAP = {
     # Общие
     "image_1": "Исходное изображение / Ссылка",
@@ -320,24 +350,42 @@ VAR_MAP = {
     "situation": "Ситуация / Сюжет"
 }
 
+# --- ПОЛНЫЙ СЛОВАРЬ ПРИМЕРОВ (ОБНОВЛЕНО) ---
 EXAMPLES_DB = {
-    "image_1": {"ph": "Ссылка на фото...", "help": "Основное изображение."},
-    "image_2": {"ph": "Ссылка на референс...", "help": "Дополнительное изображение."},
-    "aspect_ratio": {"ph": "16:9, 4:3, 1:1...", "help": "Соотношение сторон итоговой картинки."},
-    "background": {"ph": "На Марсе, В офисе, Белая студия...", "help": "Где происходит действие?"},
-    "lighting": {"ph": "Cinematic, Softbox, Neon, Natural...", "help": "Схема освещения."},
-    "fabric_material": {"ph": "Silk, Denim, Leather, Cotton...", "help": "Из чего сделана одежда?"},
-    "lens_match_mode": {"ph": "feel или strict", "help": "feel - визуальное сходство, strict - точное фокусное."},
-    "placement_details": {"ph": "На столе слева, В руке героя...", "help": "Куда именно вставить объект?"},
-    "print_finish": {"ph": "Matte paper, Gold foil, Glossy plastic...", "help": "Фактура материала для мокапа."},
-    "show_preview": {"ph": "yes / no", "help": "yes - покажет плитку 2х2, no - один паттерн."},
-    "focus_stacking": {"ph": "on / off", "help": "Включить ли полную резкость по всей глубине?"},
-    "platform": {"ph": "iOS, Android, Web", "help": "Для какой системы дизайн?"},
-    "level": {"ph": "medium", "help": "Насколько сильно менять стиль (light/medium/strong)."},
-    "person": {"ph": "Илон Маск, Девушка, Бэтмен...", "help": "Главный герой."}
+    "image_1": {"ph": "Вставьте ссылку на ваше фото...", "help": "Главное изображение для обработки (Ctrl+V)."},
+    "image_2": {"ph": "Ссылка на референс или стиль...", "help": "Откуда берем лицо, одежду или стиль?"},
+    "aspect_ratio": {"ph": "16:9 (YouTube), 9:16 (Stories), 1:1...", "help": "Пропорции итоговой картинки."},
+    "background": {"ph": "На Марсе, В современном офисе, Сказочный лес...", "help": "Где происходит действие?"},
+    "lighting": {"ph": "Кинематографичный, Мягкий свет из окна, Неон...", "help": "Какое настроение задает свет?"},
+    "style": {"ph": "Киберпанк, Масло, Аниме, Фотореализм...", "help": "В каком стиле рисовать?"},
+    "colors": {"ph": "Черный и золотой, Пастельные тона, Яркий неон...", "help": "Главные цвета изображения."},
+    "person": {"ph": "Илон Маск, Девушка в красном, Бэтмен...", "help": "Кто главный герой?"},
+    "emotion": {"ph": "Восторг, Подозрение, Усталость...", "help": "Какую эмоцию играет персонаж?"},
+    "object": {"ph": "Красный диван, Айфон, Бутылка колы...", "help": "Какой предмет добавить или убрать?"},
+    "fabric_material": {"ph": "Шелк, Деним, Кожа, Грубый хлопок...", "help": "Из чего сделана одежда?"},
+    "building_type": {"ph": "Небоскреб, Уютный коттедж, Стеклянный офис...", "help": "Что за здание мы строим?"},
+    "environment": {"ph": "В центре Нью-Йорка, В заснеженных горах...", "help": "Что находится вокруг здания?"},
+    "time": {"ph": "Золотой час, Туманное утро, Дождливая ночь...", "help": "Время суток и погода."},
+    "lens": {"ph": "24mm (широкий), 35mm (стандарт), 85mm (портрет)...", "help": "На какой объектив снимаем?"},
+    "brand": {"ph": "Nike, Tesla, МояКофейня...", "help": "Название вашего бренда."},
+    "industry": {"ph": "Салон красоты, IT-стартап, Доставка еды...", "help": "Чем занимается компания?"},
+    "product": {"ph": "Кроссовки, Бутылка воды, Крем для лица...", "help": "Что продаем?"},
+    "features_list": {"ph": "Эко-френдли, 24/7, Бесплатная доставка...", "help": "Главные фишки для инфографики."},
+    "text": {"ph": "СКИДКИ 50%, Nano Banano...", "help": "Текст, который нужно написать на картинке."},
+    "placement_details": {"ph": "На столе справа, В руке героя, Парит в воздухе...", "help": "Куда именно поместить объект?"},
+    "print_finish": {"ph": "Матовая бумага, Золотое тиснение, Глянец...", "help": "Фактура материала для мокапа."},
+    "room_type": {"ph": "Лофт-гостиная, Спальня в скандинавском стиле...", "help": "Какую комнату дизайним?"},
+    "lens_match_mode": {"ph": "feel (визуально похоже) или strict (строго)", "help": "Как сводить линзы при монтаже?"},
+    "focus_stacking": {"ph": "on (все в фокусе) / off (размытый фон)", "help": "Включить полную резкость?"},
+    "platform": {"ph": "iOS, Android, Web", "help": "Для какой платформы дизайн?"},
+    "level": {"ph": "medium (средний), strong (сильный)...", "help": "Насколько сильно менять стиль?"},
+    "character": {"ph": "Милый робот, Рыжий кот, Девушка-эльф...", "help": "Персонаж для стикеров."},
+    "count": {"ph": "6, 9, 12", "help": "Сколько стикеров в наборе?"},
+    "list": {"ph": "Смех, Гнев, Сон, Ест пиццу...", "help": "Список эмоций через запятую."},
+    "scene_description": {"ph": "Робот дарит цветок девочке на закате...", "help": "Что происходит в сцене?"}
 }
 
-# --- 7. ENGINE ---
+# --- 8. ENGINE ---
 @st.cache_resource
 def load_engine():
     if not os.path.exists('prompts.json'):
@@ -350,9 +398,8 @@ if not manager:
     st.error("❌ Файл `prompts.json` не найден. Загрузите его в ту же папку.")
     st.stop()
 
-# --- 8. SIDEBAR ---
+# --- 9. SIDEBAR ---
 with st.sidebar:
-    # Кнопка для визуального стиля (как на скриншоте)
     st.button("🍌 PRO MENU", key="promenu_btn", use_container_width=True)
     tab_menu, tab_history = st.tabs(["Меню", "История"])
 
@@ -367,11 +414,10 @@ with tab_menu:
     with st.container(border=True):
         st.info(current_prompt_data['description'])
 
-# --- 9. MAIN FORM ---
+# --- 10. MAIN FORM ---
 st.subheader(f"{selected_title}")
 
 template = current_prompt_data['prompt_en']
-# Ищем переменные в квадратных скобках
 required_vars = sorted(list(set(re.findall(r'\[(.*?)\]', template))))
 user_inputs = {}
 
@@ -384,7 +430,6 @@ else:
         cols = st.columns(2)
         for i, var in enumerate(required_vars):
             col = cols[i % 2]
-            # Берем красивое название из VAR_MAP или оставляем как есть
             label = VAR_MAP.get(var, f"Введите {var}")
             example_data = EXAMPLES_DB.get(var, {})
             placeholder_text = example_data.get("ph", f"Пример...")
@@ -398,11 +443,17 @@ else:
             )
             
         st.write("---")
+        
+        # 🔴 ПЕРЕКЛЮЧАТЕЛЬ НЕГАТИВА
+        neg_mode = st.radio("Режим негатива (Negative Prompt):", 
+                            ["Mini (Легкий)", "Default (Mini+)", "Aggressive (Full)"], 
+                            index=1, horizontal=True)
+        
+        st.write(" ")
         submitted = st.form_submit_button("🍌 Сгенерировать Промпт", use_container_width=True)
 
-# --- 10. GENERATION LOGIC ---
+# --- 11. GENERATION LOGIC (HYBRID MODE) ---
 if 'submitted' in locals() and submitted:
-    # Проверка на пустые поля
     missing = [VAR_MAP.get(k, k) for k, v in user_inputs.items() if not v]
     
     if missing:
@@ -417,7 +468,6 @@ if 'submitted' in locals() and submitted:
                 translator_ru = GoogleTranslator(source='auto', target='ru')
                 
                 for key, text in user_inputs.items():
-                    # Если ссылка, не переводим
                     if text.strip().startswith(("http", "www", "https")):
                         inputs_en[key] = text
                         inputs_ru[key] = text
@@ -425,29 +475,66 @@ if 'submitted' in locals() and submitted:
                         inputs_en[key] = translator_en.translate(text)
                         inputs_ru[key] = translator_ru.translate(text)
 
-                res_ru = manager.generate(selected_id, 'ru', **inputs_ru)
-                res_en = manager.generate(selected_id, 'en', **inputs_en)
+                # Генерация полных строк
+                def clean_positive(text):
+                    if "NEG (optional):" in text:
+                        return text.split("NEG (optional):")[0].strip()
+                    return text.strip()
+
+                res_ru = clean_positive(manager.generate(selected_id, 'ru', **inputs_ru))
+                res_en = clean_positive(manager.generate(selected_id, 'en', **inputs_en))
+
+                # Подбираем негатив по группе и режиму
+                group_id = ID_TO_GROUP.get(selected_id, 1) 
                 
-                save_to_history(selected_title, res_en, res_ru)
+                mode_key = "Plus"
+                if "Mini" in neg_mode: mode_key = "Mini"
+                elif "Aggressive" in neg_mode: mode_key = "Full"
+                
+                neg_text_en = NEG_GROUPS[group_id][mode_key]['en']
+                neg_text_ru = NEG_GROUPS[group_id][mode_key]['ru']
+
+                save_to_history(selected_title, f"{res_en} --no {neg_text_en}", f"{res_ru} | NEG: {neg_text_ru}")
             
-            st.success("✨ **Готово! Промпт успешно сгенерирован и сохранен.**")
+            st.success(":material/check_circle: **Готово! Промпт успешно сгенерирован.**")
             
-            tab1, tab2 = st.tabs(["🇺🇸 **English (Готово для AI)**", "🇷🇺 Русский (Для проверки)"])
+            tab1, tab2 = st.tabs(["🇺🇸 **English (PRO)**", "🇷🇺 Русский (Info)"])
             
+            # --- ВКЛАДКА 1: ENGLISH (ГИБРИДНЫЙ ВАРИАНТ) ---
             with tab1:
-                st.markdown("##### 👇 Скопируйте этот текст в нейросеть:")
-                st.code(res_en, language="text")
-                key_en = f"copy_en_{hash(res_en)}"
-                st_copy_to_clipboard(res_en, "📋 Скопировать English Промпт", key=key_en)
+                # 1. Единый блок для Ботов
+                full_bot_text = f"{res_en} --no {neg_text_en}"
                 
+                st.markdown("### :material/rocket_launch: Всё в одном (для ботов)")
+                st.caption(f"Автоматически добавлено '--no' перед негативом ({mode_key}).")
+                st.code(full_bot_text, language="text")
+                st_copy_to_clipboard(full_bot_text, "📋 Скопировать всё", key=f"all_{hash(full_bot_text)}")
+                
+                st.divider()
+                
+                # 2. Раздельные блоки
+                st.markdown("### :material/build: Раздельно (для WebUI)")
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.caption(":material/add_circle: **Positive Prompt**")
+                    st.code(res_en, language="text")
+                    st_copy_to_clipboard(res_en, "Коп. Positive", key=f"pos_{hash(res_en)}")
+                
+                with col2:
+                    st.caption(f":material/do_not_disturb_on: **Negative Prompt**")
+                    st.code(neg_text_en, language="text")
+                    st_copy_to_clipboard(neg_text_en, "Коп. Negative", key=f"neg_{hash(neg_text_en)}")
+
+            # --- ВКЛАДКА 2: РУССКИЙ (ПЕРЕВОД) ---
             with tab2:
-                st.markdown("##### Перевод для контроля смысла:")
-                st.code(res_ru, language="text")
-                key_ru = f"copy_ru_{hash(res_ru)}"
-                st_copy_to_clipboard(res_ru, "📋 Скопировать Русский Промпт", key=key_ru)
+                st.markdown("##### 🇷🇺 Что мы попросили нейросеть:")
+                
+                st.info(f"**Рисуем:**\n\n{res_ru}")
+                st.warning(f"**Запрещаем ({mode_key}):**\n\n{neg_text_ru}")
                 
         except Exception as e:
-            st.error(f"❌ Ошибка генерации или перевода: {e}")
+            st.error(f"❌ Ошибка: {e}")
 
 # --- 11. HISTORY OUTPUT ---
 with tab_history:
@@ -472,4 +559,3 @@ with tab_history:
 
 with st.sidebar:
     st.markdown("---")
-    st.markdown("Made with ❤️ for Nano Banano Pro")
