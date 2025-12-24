@@ -1,182 +1,182 @@
 {
   "upscale_restore": {
     "title": "01. Улучшение качества (Re-Imagine)",
-    "description": "Восстанавливает детали и кожу, не меняя суть.",
-    "prompt_ru": "Создать высокодетализированную версию [image_1]. Сохранить: композицию, кадрирование, позу, возраст, прическу, макияж и идентичность лица строго 1:1. Улучшить: четкость, микродетали, текстуру кожи (поры/пушок), убрать размытость и артефакты сжатия. Технически: сохранить исходное film grain (пленочное зерно), без художественной стилизации, без “beauty”-перелицовки. Формат: [aspect_ratio], output 4K, sRGB. Без лишнего текста/водяных знаков.\nNEG (optional): восковая/пластиковая кожа, пересглаживание, бьюти-ретушь, изменение черт лица, потеря сходства, жуткое лицо, лишние зубы, деформированные руки, лишние конечности/пальцы, AI-свечение, ореолы перешарпа, сильный шум, цветовые полосы, лишний текст, водяной знак, логотип",
-    "prompt_en": "Generate a high-fidelity recreation of [image_1]. Keep: composition, cropping, pose, age, hairstyle, makeup, and facial identity strictly 1:1. Enhance: clarity, micro-detail, natural skin texture (pores/vellus hair), remove blur and compression artifacts. Technical: retain original film grain, no artistic restyling, no beauty reshaping. Format: [aspect_ratio], output 4K, sRGB. No extra text/watermarks.\nNEG (optional): waxy/plastic skin, over-smoothing, beauty retouch, face reshaping, identity drift, uncanny face, extra teeth, deformed hands, extra limbs/fingers, AI glow, over-sharpen halos, heavy noise, color banding, extra text, watermark, logo"
+    "description": "Восстановление деталей без изменения сути.",
+    "prompt_ru": "Улучшить качество [image_1]: сохранить композицию/позу/лицо 1:1; восстановить микродетали и текстуру кожи (поры/пушок), убрать blur/компрессию; сохранить исходный film grain. Формат [aspect_ratio], 4K, sRGB. Без текста/водяных знаков.",
+    "prompt_en": "Enhance [image_1] without changing identity: keep composition/pose/face 1:1; restore micro-detail and natural skin texture (pores/vellus hair), remove blur/compression; retain original film grain. Format [aspect_ratio], 4K, sRGB. No text/watermarks."
   },
   "studio_portrait": {
     "title": "02. Студийный портрет (High-End)",
-    "description": "Портрет уровня Vogue.",
-    "prompt_ru": "High-end студийный портрет [person] на фоне [background]. Освещение: [lighting]. Камера: medium format look (~100MP), объектив 85mm f/1.8. Детали: фокус строго на глазах, мягкое боке. Кожа ультра-реалистичная (поры + пушок), без “пластика”. Не менять черты лица ретушью и не менять возраст. Фон/композицию не менять, если не указано иначе. Формат: [aspect_ratio], output 4K, sRGB. Без лишнего текста/водяных знаков.\nNEG (optional): восковая/пластиковая кожа, пересглаживание, бьюти-ретушь, изменение черт лица, потеря сходства, жуткое лицо, лишние зубы, деформированные руки, лишние конечности/пальцы, AI-свечение, ореолы перешарпа, сильный шум, цветовые полосы, лишний текст, водяной знак, логотип",
-    "prompt_en": "High-end studio portrait of [person] against [background]. Lighting: [lighting]. Camera: medium format look (~100MP), 85mm lens at f/1.8. Details: tack-sharp focus on eyes, soft bokeh. Ultra-real skin (pores + vellus hair), no plastic look. Do not alter facial features or age via retouching. Keep background/composition unless specified. Format: [aspect_ratio], output 4K, sRGB. No extra text/watermarks.\nNEG (optional): waxy/plastic skin, over-smoothing, beauty retouch, face reshaping, identity drift, uncanny face, extra teeth, deformed hands, extra limbs/fingers, AI glow, over-sharpen halos, heavy noise, color banding, extra text, watermark, logo"
+    "description": "Портрет уровня обложки.",
+    "prompt_ru": "Студийный high-end портрет [person] на фоне [background], свет [lighting]. Резкий фокус на глазах, мягкое боке; кожа натуральная (поры/пушок), без смены возраста и черт лица. Формат [aspect_ratio], 4K, sRGB. Без текста/водяных знаков.",
+    "prompt_en": "High-end studio portrait of [person] on [background], lighting [lighting]. Sharp eyes, soft bokeh; natural skin texture (pores/vellus hair), no face/age changes. Format [aspect_ratio], 4K, sRGB. No text/watermarks."
   },
   "background_change": {
     "title": "03. Замена фона (Background Change)",
-    "description": "Переносит персонажа в новую локацию.",
-    "prompt_ru": "[image_1] = персонаж (Keep), [background] = новое окружение. Действие: изолировать персонажа и поместить в новый фон. Критично: match lighting, match DOF, match film grain (без цифрового шума). Добавить реалистичную контактную тень под ногами/опорой. Совместить линию горизонта/точку схода, корректный масштаб, совпадение “ощущения фокусного” и высоты камеры. Формат: [aspect_ratio], output 4K, sRGB. Без швов/ореолов/текста.\nNEG (optional): восковая/пластиковая кожа, пересглаживание, бьюти-ретушь, изменение черт лица, потеря сходства, жуткое лицо, лишние зубы, деформированные руки, лишние конечности/пальцы, AI-свечение, ореолы перешарпа, сильный шум, цветовые полосы, лишний текст, водяной знак, логотип",
-    "prompt_en": "[image_1] = subject (Keep), [background] = new environment. Action: isolate subject and composite into new background. Critical: match lighting, DOF, and film grain (avoid digital noise). Add realistic ground contact shadow. Align horizon/vanishing point, correct scale, match focal-length feel and camera height. Format: [aspect_ratio], output 4K, sRGB. No seams/halos/text.\nNEG (optional): waxy/plastic skin, over-smoothing, beauty retouch, face reshaping, identity drift, uncanny face, extra teeth, deformed hands, extra limbs/fingers, AI glow, over-sharpen halos, heavy noise, color banding, extra text, watermark, logo"
+    "description": "Перенос персонажа в новое окружение.",
+    "prompt_ru": "Вырезать персонажа из [image_1] и поместить в [background]; совпадение света/DOF/film grain, корректный масштаб и горизонт; добавить контактную тень. Формат [aspect_ratio], 4K, sRGB. Без швов/ореолов/текста.",
+    "prompt_en": "Cut out the subject from [image_1] and place into [background]; match lighting/DOF/film grain, correct scale and horizon; add a ground contact shadow. Format [aspect_ratio], 4K, sRGB. No seams/halos/text."
   },
   "face_swap": {
     "title": "04. Замена лица (Face Swap)",
-    "description": "Меняет лицо, сохраняя сцену.",
-    "prompt_ru": "[image_1] = сцена/тело, [image_2] = донор лица. Действие: заменить ТОЛЬКО facial region, не трогая волосы/уши/контур черепа/шею. Сохранить: направление взгляда, освещение и тон кожи сцены. Технически: бесшовный inpainting по краям, совпадение film grain и цветокоррекции. Формат: [aspect_ratio], output 4K, sRGB. Без артефактов/ореолов/текста. Только при наличии прав/согласия.\nNEG (optional): восковая/пластиковая кожа, пересглаживание, бьюти-ретушь, изменение черт лица, потеря сходства, жуткое лицо, лишние зубы, деформированные руки, лишние конечности/пальцы, AI-свечение, ореолы перешарпа, сильный шум, цветовые полосы, лишний текст, водяной знак, логотип",
-    "prompt_en": "[image_1] = scene/body, [image_2] = donor face. Action: swap ONLY the facial region; do not change hair/ears/skull outline/neck. Keep: eye direction, original lighting and scene skin tone. Technical: seamless inpainting blend, match film grain and color grading. Format: [aspect_ratio], output 4K, sRGB. No artifacts/halos/text. Only with rights/consent.\nNEG (optional): mismatched skin, hard edges, halo, extra text, watermark"
+    "description": "Замена лица с сохранением сцены (только с правами/согласием).",
+    "prompt_ru": "Face swap: [image_1] = сцена/тело, [image_2] = донор. Менять только область лица; не трогать волосы/уши/контур головы/шею; сохранить взгляд/свет/тон кожи, сделать бесшовный блендинг и совпадение зерна. Формат [aspect_ratio], 4K, sRGB. Только при наличии прав/согласия.",
+    "prompt_en": "Face swap: [image_1] = scene/body, [image_2] = donor. Change only the facial region; keep hair/ears/head outline/neck; preserve gaze/lighting/skin tone; seamless blend with matching grain. Format [aspect_ratio], 4K, sRGB. Only with rights/consent."
   },
   "expression_change": {
     "title": "05. Изменение эмоции",
-    "description": "Коррекция мимики без смены личности.",
-    "prompt_ru": "Изменить эмоцию на [image_1] на: [emotion]. Интенсивность: [intensity]. Сохранить: identity, форму лица, наклон головы, прическу, макияж, освещение. Зубы/прикус не менять (если не требуется улыбка). Детали: естественные микровыражения (морщинки вокруг глаз, работа мышц, форма рта). Формат: [aspect_ratio], output 4K, sRGB. Без артефактов/текста.\nNEG (optional): восковая/пластиковая кожа, пересглаживание, бьюти-ретушь, изменение черт лица, потеря сходства, жуткое лицо, лишние зубы, деформированные руки, лишние конечности/пальцы, AI-свечение, ореолы перешарпа, сильный шум, цветовые полосы, лишний текст, водяной знак, логотип",
-    "prompt_en": "Change expression in [image_1] to: [emotion]. Intensity: [intensity]. Keep: identity, facial structure, head tilt, hairstyle, makeup, lighting. Do not change teeth/bite (unless smiling is required). Details: natural micro-expressions (eye crinkles, muscle tension, accurate mouth shape). Format: [aspect_ratio], output 4K, sRGB. No artifacts/text.\nNEG (optional): face warp, identity drift, extra text, watermark"
+    "description": "Смена эмоции без потери сходства.",
+    "prompt_ru": "Изменить эмоцию на [image_1] на [emotion] (интенсивность [intensity]); сохранить identity/наклон головы/макияж/свет; зубы не менять, если не нужна улыбка. Формат [aspect_ratio], 4K, sRGB. Без текста/артефактов.",
+    "prompt_en": "Change expression in [image_1] to [emotion] (intensity [intensity]); keep identity/head tilt/makeup/lighting; do not change teeth unless smiling. Format [aspect_ratio], 4K, sRGB. No text/artifacts."
   },
   "cloth_swap": {
     "title": "06. Виртуальная примерка (Virtual Try-On)",
-    "description": "Меняет одежду, сохраняя позу и тело.",
-    "prompt_ru": "[image_1] = модель, [image_2] = одежда. Материал: [fabric_material]. Сохранить: лицо, руки, волосы, аксессуары, позу, фон и освещение (если не указано иначе). Изменить: только одежду. Физика ткани: складки/натяжение/вес/толщина, корректный bounce light. Match DOF + match film grain обязательно. Формат: [aspect_ratio], output 4K, sRGB. Без артефактов/текста.\nNEG (optional): восковая/пластиковая кожа, пересглаживание, бьюти-ретушь, изменение черт лица, потеря сходства, жуткое лицо, лишние зубы, деформированные руки, лишние конечности/пальцы, AI-свечение, ореолы перешарпа, сильный шум, цветовые полосы, лишний текст, водяной знак, логотип",
-    "prompt_en": "[image_1] = model, [image_2] = outfit. Material: [fabric_material]. Keep: face, hands, hair, accessories, pose, background and lighting unless specified. Change: clothing only. Fabric physics: folds/tension/weight/thickness, correct bounce light. Match DOF + match film grain. Format: [aspect_ratio], output 4K, sRGB. No artifacts/text.\nNEG (optional): body warp, extra limbs, cloth clipping, extra text, watermark"
+    "description": "Замена одежды с корректной физикой ткани.",
+    "prompt_ru": "Заменить одежду на [image_1] по референсу [image_2]; сохранить лицо/руки/волосы/аксессуары/позу; ткань [fabric_material] с реалистичными складками/натяжением и bounce light; совпадение DOF и grain. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Replace clothing on [image_1] using [image_2] reference; keep face/hands/hair/accessories/pose; fabric [fabric_material] with realistic folds/tension and bounce light; match DOF and grain. Format [aspect_ratio], 4K, sRGB."
   },
   "object_removal": {
     "title": "07. Удаление объекта (Inpainting)",
-    "description": "Удаляет объект и его следы.",
-    "prompt_ru": "Удалить [object] с [image_1]. Критично: удалить также падающую тень, отражение, блики и spill light от объекта. Заполнить (inpaint) контекстно, восстановить текстуры/резкость/film grain без замыливания. Сохранить геометрию линий (плитка/стены) и перспективу. Формат: [aspect_ratio], output 4K, sRGB. Без “призраков”, швов, текста.\nNEG (optional): швы, ореолы, обрезанные края, двоение (ghosting), размазывание, искаженная перспектива/линии, левитирующие объекты, неправильный масштаб, неверные тени, несоответствие света, разное зерно/шум, несовпадение цветов, отсутствие/ошибка отражений, артефакты размытия, лишний текст, водяной знак, логотип",
-    "prompt_en": "Remove [object] from [image_1]. Critical: also remove cast shadows, reflections, highlights, and spill light. Context-aware inpainting; restore textures/sharpness/film grain without smearing. Preserve line geometry and perspective. Format: [aspect_ratio], output 4K, sRGB. No ghosting, seams, text.\nNEG (optional): ghosting, smear, seam, extra text, watermark"
+    "description": "Удаление объекта с восстановлением фона.",
+    "prompt_ru": "Удалить [object] с [image_1], включая тени/отражения/блики от него; inpaint фоном по контексту, восстановить текстуру/резкость/grain, сохранить перспективу линий. Формат [aspect_ratio], 4K, sRGB. Без швов/призраков/текста.",
+    "prompt_en": "Remove [object] from [image_1] including its shadows/reflections/highlights; context-aware inpaint, restore texture/sharpness/grain, preserve line perspective. Format [aspect_ratio], 4K, sRGB. No seams/ghosting/text."
   },
   "object_addition": {
     "title": "08. Добавление предмета (Object Addition)",
-    "description": "Вставляет новый объект в сцену.",
-    "prompt_ru": "Вставить [object] в [image_1]. Место: [placement_details]. Обязательно: совпадение перспективы, масштаба, высоты камеры, DOF. Физика: отбрасываемая тень + контактная AO. Цвет: match white balance, match color temperature, match film grain (без цифрового шума). Отражения: если поверхность отражающая (glossy/mirror) — добавить физически правдоподобное отражение. Формат: [aspect_ratio], output 4K, sRGB. Без артефактов/текста.\nNEG (optional): швы, ореолы, обрезанные края, двоение (ghosting), размазывание, искаженная перспектива/линии, левитирующие объекты, неправильный масштаб, неверные тени, несоответствие света, разное зерно/шум, несовпадение цветов, отсутствие/ошибка отражений, артефакты размытия, лишний текст, водяной знак, логотип",
-    "prompt_en": "Insert [object] into [image_1]. Placement: [placement_details]. Must match perspective, scale, camera height, and DOF. Physics: cast shadow + contact AO. Color: match white balance, color temperature, and film grain (avoid digital noise). Reflections: if the surface is reflective (glossy/mirror), add physically plausible reflection. Format: [aspect_ratio], output 4K, sRGB. No artifacts/text.\nNEG (optional): floating object, wrong shadow, mismatch grain, extra text, watermark"
+    "description": "Вставка объекта с физически правдоподобными тенями.",
+    "prompt_ru": "Вставить [object] в [image_1] (место: [placement_details]); совпадение перспективы/масштаба/высоты камеры/DOF; отбрасываемая тень + контактная AO; совпадение WB/температуры/grain; отражение если поверхность глянцевая. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Insert [object] into [image_1] (placement: [placement_details]); match perspective/scale/camera height/DOF; cast shadow + contact AO; match WB/temperature/grain; add reflection if surface is glossy. Format [aspect_ratio], 4K, sRGB."
   },
   "scene_relighting": {
     "title": "09. Смена освещения (Relighting)",
-    "description": "Меняет световой сценарий, не меняя сцены.",
-    "prompt_ru": "Relight [image_1]. Условие: [lighting_condition]. Сохранить: геометрию и материалы/текстуры; если есть люди — identity. Изменить: направление теней, температуру, интенсивность, спекулярные блики. Важно: не “редизайнить” материалы — менять только свет/тени/блики. Один согласованный key light + логичный fill/rim (если нужно). Формат: [aspect_ratio], output 4K, sRGB. Без текста/водяных знаков.\nNEG (optional): швы, ореолы, обрезанные края, двоение (ghosting), размазывание, искаженная перспектива/линии, левитирующие объекты, неправильный масштаб, неверные тени, несоответствие света, разное зерно/шум, несовпадение цветов, отсутствие/ошибка отражений, артефакты размытия, лишний текст, водяной знак, логотип",
-    "prompt_en": "Relight [image_1]. Condition: [lighting_condition]. Keep: geometry and materials/textures; if people exist—identity. Change: shadow direction, temperature, intensity, specular highlights. Important: do not redesign materials—only update lighting/shadows/highlights. One coherent key + logical fill/rim if needed. Format: [aspect_ratio], output 4K, sRGB. No text/watermarks.\nNEG (optional): texture repaint, material change, extra text, watermark"
+    "description": "Новый свет без изменения материалов/геометрии.",
+    "prompt_ru": "Relight [image_1] под [lighting_condition]; сохранить геометрию и материалы (и identity людей); пересчитать тени/блики/температуру/интенсивность, не перекрашивать текстуры. Формат [aspect_ratio], 4K, sRGB. Без текста.",
+    "prompt_en": "Relight [image_1] to [lighting_condition]; keep geometry/materials (and people identity); recompute shadows/highlights/temperature/intensity, do not repaint textures. Format [aspect_ratio], 4K, sRGB. No text."
   },
   "scene_composite": {
     "title": "10. Сложный фотомонтаж (Global Composite)",
-    "description": "Собирает одну сцену из нескольких элементов.",
-    "prompt_ru": "[element_1] = основа (base plate), [element_2] = вставка (insert). Сцена: [scene_description]. Match: масштаб, перспектива, высоты камеры, WB/цветокоррекция, film grain, DOF, контактные тени/окклюзия. Lens match mode: [lens_match_mode].\n— Если feel: подогнать “ощущение фокусного” (lens look) так, чтобы выглядело как один снимок.\n— Если strict: match focal length (эквивалентное фокусное) строго.\nФормат: [aspect_ratio], output 4K, sRGB. Без швов/ореолов/текста.\nNEG (optional): швы, ореолы, обрезанные края, двоение (ghosting), размазывание, искаженная перспектива/линии, левитирующие объекты, неправильный масштаб, неверные тени, несоответствие света, разное зерно/шум, несовпадение цветов, отсутствие/ошибка отражений, артефакты размытия, лишний текст, водяной знак, логотип",
-    "prompt_en": "[element_1] = base plate, [element_2] = insert. Scene: [scene_description]. Match: scale, perspective, camera height, WB/color grading, film grain, DOF, contact shadows/occlusion. Lens match mode: [lens_match_mode].\n— feel: match lens look / focal-length feel so it reads as one photo.\n— strict: match focal length strictly.\nFormat: [aspect_ratio], output 4K, sRGB. No seams/halos/text.\nNEG (optional): mismatch perspective, halo, seam, extra text, watermark"
+    "description": "Сведение элементов в один правдоподобный кадр.",
+    "prompt_ru": "Собрать сцену: [element_1] + [element_2] = [scene_description]; совместить масштаб/перспективу/высоту камеры, WB/цвет, DOF, grain и контактные тени; сведение линз: [lens_match_mode]. Формат [aspect_ratio], 4K, sRGB. Без швов/ореолов/текста.",
+    "prompt_en": "Composite: [element_1] + [element_2] into [scene_description]; match scale/perspective/camera height, WB/color, DOF, grain and contact shadows; lens matching: [lens_match_mode]. Format [aspect_ratio], 4K, sRGB. No seams/halos/text."
   },
   "product_card": {
     "title": "11. Карточка товара (Product Card)",
     "description": "Инфографика для маркетплейсов.",
-    "prompt_ru": "Дизайн карточки для [product] на основе [image_1]. Пропорции: [aspect_ratio]. Композиция: продукт 50–60% кадра. Инфографика: текст строго “[text]” + иконки/фичи [features_list]. Технически: safe margins 5–8%, текст не перекрывает товар/детали, читабельность на мобильном. Типографика без ошибок и “битых” букв. Формат: [aspect_ratio], output 4K, sRGB. Без водяных знаков.\nNEG (optional): опечатки, битые символы, lorem ipsum, мелкий нечитаемый текст, визуальный мусор, кривая верстка, низкий контраст, пикселизация, рваные края, неверные пропорции, случайный бренд/логотип, водяной знак, лишние QR-коды, неразборчивые иконки",
-    "prompt_en": "Product card for [product] based on [image_1]. Aspect ratio: [aspect_ratio]. Layout: product 50–60% of frame. Infographics: text exactly “[text]” + feature icons [features_list]. Technical: 5–8% safe margins, no overlap on key details, mobile-readable. Clean typography with strict spell-check. Format: [aspect_ratio], output 4K, sRGB. No watermarks.\nNEG (optional): tiny unreadable text, broken letters, watermark"
+    "prompt_ru": "Карточка товара [product] на основе [image_1]: продукт 50–60% кадра; текст строго “[text]”, фичи [features_list]; безопасные поля 5–8%, читабельно на мобиле. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Product card for [product] from [image_1]: product 50–60% of frame; text exactly “[text]”, features [features_list]; 5–8% safe margins, mobile readable. Format [aspect_ratio], 4K, sRGB."
   },
   "mockup_generation": {
     "title": "12. Генерация мокапа (Mockup)",
-    "description": "Наносит дизайн на объект, сохраняя читаемость.",
-    "prompt_ru": "Наложить дизайн на 3D-модель [object_type]. Фон: [background_type]. Покрытие: [print_finish]. Критично: текст/логотип читаемы; деформация только по кривизне поверхности. Студийный свет, корректные блики/материал. Без сторонних логотипов/водяных знаков. Формат: [aspect_ratio], output 4K, sRGB.\nNEG (optional): опечатки, битые символы, lorem ipsum, мелкий нечитаемый текст, визуальный мусор, кривая верстка, низкий контраст, пикселизация, рваные края, неверные пропорции, случайный бренд/логотип, водяной знак, лишние QR-коды, неразборчивые иконки",
-    "prompt_en": "Map design onto a 3D model of [object_type]. Background: [background_type]. Finish: [print_finish]. Critical: text/logo remains legible; warp only by surface curvature. Studio lighting, correct highlights/material response. No extra logos/watermarks. Format: [aspect_ratio], output 4K, sRGB.\nNEG (optional): unreadable logo, random brand, watermark"
+    "description": "Дизайн на объекте с читаемым текстом/лого.",
+    "prompt_ru": "Мокап: наложить дизайн на [object_type], фон [background_type], покрытие [print_finish]; деформация только по кривизне, текст/логотип читаемы, студийный свет. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Mockup: apply design to [object_type], background [background_type], finish [print_finish]; warp only by curvature, text/logo readable, studio lighting. Format [aspect_ratio], 4K, sRGB."
   },
   "knolling_photography": {
     "title": "13. Кноллинг (Knolling / Flat Lay)",
     "description": "Аккуратная раскладка предметов сверху.",
-    "prompt_ru": "Knolling [object]. Фон: [background]. Строгий вид сверху, сетка 90°, равные отступы, организованная композиция. Свет: мягкий diffused, почти бестеневой + лёгкая контактная окклюзия (чтобы предметы не “парили”). Высокая резкость. Формат: [aspect_ratio], output 4K, sRGB. Без текста/водяных знаков.\nNEG (optional): опечатки, битые символы, lorem ipsum, мелкий нечитаемый текст, визуальный мусор, кривая верстка, низкий контраст, пикселизация, рваные края, неверные пропорции, случайный бренд/логотип, водяной знак, лишние QR-коды, неразборчивые иконки",
-    "prompt_en": "Knolling [object]. Background: [background]. Strict top-down, 90° grid, consistent spacing, organized layout. Lighting: soft diffused near-shadowless + subtle contact occlusion (no floating). High sharpness. Format: [aspect_ratio], output 4K, sRGB. No text/watermarks.\nNEG (optional): clutter, perspective tilt, watermark"
+    "prompt_ru": "Knolling [object] на фоне [background]: строго сверху, сетка 90°, равные отступы, высокая резкость; мягкий diffused свет + лёгкая контактная тень, чтобы не «парило». Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Knolling [object] on [background]: strict top-down, 90° grid, consistent spacing, high sharpness; soft diffused light + subtle contact shadow (no floating). Format [aspect_ratio], 4K, sRGB."
   },
   "logo_creative": {
     "title": "14. Логотип (Logo Creative)",
     "description": "Чистый векторный логотип.",
-    "prompt_ru": "Логотип для [brand]. Образ: [imagery]. Стиль: [style]. Технически: плоские векторные формы, чистые линии, 1:1, белый фон, чистые отступы. Текст (если есть) без ошибок. Формат: 1:1 (или [aspect_ratio]), output 4K, sRGB.\nNEG (optional): опечатки, битые символы, lorem ipsum, мелкий нечитаемый текст, визуальный мусор, кривая верстка, низкий контраст, пикселизация, рваные края, неверные пропорции, случайный бренд/логотип, водяной знак, лишние QR-коды, неразборчивые иконки",
-    "prompt_en": "Logo for [brand]. Imagery: [imagery]. Style: [style]. Technical: flat vector shapes, clean lines, centered 1:1 on white, clear margins. Perfect spelling for any text. Format: 1:1 (or [aspect_ratio]), output 4K, sRGB.\nNEG (optional): photorealistic, mockup, 3d, render, gradients, textures, shadows, realistic lighting, watermark"
+    "prompt_ru": "Векторный логотип для [brand]: образ [imagery], стиль [style]; чистые линии, плоские формы, центр 1:1 на белом фоне, правильные отступы; текст без ошибок. Формат 1:1 (или [aspect_ratio]), 4K, sRGB.",
+    "prompt_en": "Vector logo for [brand]: imagery [imagery], style [style]; clean lines, flat shapes, centered 1:1 on white with clear margins; perfect spelling. Format 1:1 (or [aspect_ratio]), 4K, sRGB."
   },
   "logo_stylization": {
     "title": "15. 3D Логотип (Logo Stylization)",
-    "description": "Логотип, собранный из материалов/предметов.",
-    "prompt_ru": "Логотип [image_1], выполненный из [materials]. Сохранить: силуэт и геометрию 1:1. Изменить: только материализацию. Top-down, белый фон, единый свет, мягкие тени под объектами, фотореализм. Формат: [aspect_ratio], output 4K, sRGB. Без лишних объектов/текста.\nNEG (optional): опечатки, битые символы, lorem ipsum, мелкий нечитаемый текст, визуальный мусор, кривая верстка, низкий контраст, пикселизация, рваные края, неверные пропорции, случайный бренд/логотип, водяной знак, лишние QR-коды, неразборчивые иконки",
-    "prompt_en": "Logo [image_1] constructed from [materials]. Keep: silhouette and geometry 1:1. Change: materialization only. Top-down, white background, single coherent light, soft contact shadows, photoreal. Format: [aspect_ratio], output 4K, sRGB. No extra clutter/text.\nNEG (optional): deformed logo shape, extra text, watermark"
+    "description": "Лого, собранное из материалов/предметов.",
+    "prompt_ru": "Логотип [image_1] из [materials]: силуэт 1:1, top-down на белом фоне, один согласованный свет, мягкие тени под объектами, фотореализм. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Logo [image_1] built from [materials]: keep silhouette 1:1, top-down on white, single coherent light, soft contact shadows, photoreal. Format [aspect_ratio], 4K, sRGB."
   },
   "ui_design": {
     "title": "16. UI/UX Дизайн",
-    "description": "Экран приложения/сайта.",
-    "prompt_ru": "UI дизайн [screen_type] для [industry]. Платформа: [platform]. Стиль: [style]. Сетка: 8pt grid + safe areas. Контент: реальный текст (не Lorem), без орфографических ошибок. Иконки pixel-perfect, единый стиль. Без артефактов шрифта/битых символов. Формат: [aspect_ratio], output 4K, sRGB. Без водяных знаков.\nNEG (optional): опечатки, битые символы, lorem ipsum, мелкий нечитаемый текст, визуальный мусор, кривая верстка, низкий контраст, пикселизация, рваные края, неверные пропорции, случайный бренд/логотип, водяной знак, лишние QR-коды, неразборчивые иконки",
-    "prompt_en": "UI design [screen_type] for [industry]. Platform: [platform]. Style: [style]. 8pt grid + safe areas. Real copy (no Lorem), no spelling errors. Pixel-perfect icons, consistent system. No font artifacts/broken glyphs. Format: [aspect_ratio], output 4K, sRGB. No watermarks.\nNEG (optional): lorem ipsum, broken text, random watermark"
+    "description": "Экран приложения/сайта с аккуратной типографикой.",
+    "prompt_ru": "UI экран [screen_type] для [industry] ([platform]), стиль [style]; сетка 8pt и safe areas; реальный текст без ошибок, иконки единые и pixel-perfect. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "UI screen [screen_type] for [industry] ([platform]), style [style]; 8pt grid and safe areas; real copy with no spelling errors, pixel-perfect consistent icons. Format [aspect_ratio], 4K, sRGB."
   },
   "text_design": {
     "title": "17. Типографический постер",
-    "description": "Постер с идеально воспроизведённым текстом.",
-    "prompt_ru": "Постер с текстом строго “[text]” (без изменения символов/регистра/кавычек, без лишних знаков). Шрифт: [font_style]. Аккуратный кернинг/трекинг, идеальная читаемость. Векторная четкость, поля 5–8%. Цвета: [colors]. Формат: [aspect_ratio], output 4K, sRGB. Без водяных знаков.\nNEG (optional): опечатки, битые символы, lorem ipsum, мелкий нечитаемый текст, визуальный мусор, кривая верстка, низкий контраст, пикселизация, рваные края, неверные пропорции, случайный бренд/логотип, водяной знак, лишние QR-коды, неразборчивые иконки",
-    "prompt_en": "Poster with text exactly “[text]” (no symbol/case/quote changes, no extra characters). Font: [font_style]. Clean kerning/tracking, high readability. Vector sharpness, 5–8% safe margins. Colors: [colors]. Format: [aspect_ratio], output 4K, sRGB. No watermarks.\nNEG (optional): misspelling, broken glyphs, watermark"
+    "description": "Постер с точным воспроизведением текста.",
+    "prompt_ru": "Постер с текстом строго “[text]” (без изменений символов/регистра); шрифт [font_style], аккуратный кернинг, высокая читаемость, поля 5–8%, цвета [colors]. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Poster with text exactly “[text]” (no symbol/case changes); font [font_style], clean kerning, high readability, 5–8% margins, colors [colors]. Format [aspect_ratio], 4K, sRGB."
   },
   "image_restyling": {
     "title": "18. Стилизация (Art Style)",
-    "description": "Стилизация фото в выбранную технику.",
-    "prompt_ru": "Стилизовать [image_1]. Стиль: [style]. Уровень: [level]. Медиум: [medium]. Сохранить: композицию и силуэты. Ограничение: не добавлять новые объекты, не менять анатомию/пропорции. Формат: [aspect_ratio], output 4K, sRGB. Без водяных знаков.\nNEG (optional): лишние объекты, искажение анатомии, нарушение пропорций, искажение перспективы, неряшливые линии, непоследовательный стиль, швы в паттерне, виньетка, тени там где не надо, нечитаемый текст/бессмыслица, водяной знак, логотип",
-    "prompt_en": "Restyle [image_1]. Style: [style]. Level: [level]. Medium: [medium]. Keep: composition and silhouettes. Constraint: do not add new objects; do not alter anatomy/proportions. Format: [aspect_ratio], output 4K, sRGB. No watermarks.\nNEG (optional): extra objects, anatomy warp, watermark"
+    "description": "Стилизация фото в выбранный художественный медиум.",
+    "prompt_ru": "Стилизовать [image_1] в [style], уровень [level], медиум [medium]; сохранить композицию и силуэты, не добавлять новые объекты, не ломать анатомию. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Restyle [image_1] into [style], level [level], medium [medium]; keep composition and silhouettes, no new objects, no anatomy breaks. Format [aspect_ratio], 4K, sRGB."
   },
   "sketch_to_photo": {
     "title": "19. Скетч в фото (Sketch to Photo)",
-    "description": "Перевод наброска в реализм, строго по линиям.",
-    "prompt_ru": "Рендер скетча [image_1] в фотореализм. Критично: строго следовать линиям, не менять пропорции/перспективу, не добавлять элементы, которых нет в скетче. Материалы: [materials]. Свет: [lighting] (cinematic). Формат: [aspect_ratio], output 4K, sRGB. Без лишнего текста.\nNEG (optional): лишние объекты, искажение анатомии, нарушение пропорций, искажение перспективы, неряшливые линии, непоследовательный стиль, швы в паттерне, виньетка, тени там где не надо, нечитаемый текст/бессмыслица, водяной знак, логотип",
-    "prompt_en": "Render sketch [image_1] into photorealism. Critical: adhere to lines; do not change proportions/perspective; do not add elements not in the sketch. Materials: [materials]. Lighting: [lighting] (cinematic). Format: [aspect_ratio], output 4K, sRGB. No extra text.\nNEG (optional): design changes, extra props, watermark"
+    "description": "Фотореализм строго по линиям скетча.",
+    "prompt_ru": "Рендер [image_1] в фотореализм: строго по линиям, не менять пропорции/перспективу, не добавлять новых элементов; материалы [materials], свет [lighting]. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Render [image_1] into photorealism: follow the lines strictly, do not change proportions/perspective, add no new elements; materials [materials], lighting [lighting]. Format [aspect_ratio], 4K, sRGB."
   },
   "character_sheet": {
     "title": "20. Лист персонажа (Character Sheet)",
     "description": "3 вида для 3D-референса.",
-    "prompt_ru": "Персонаж: [description]. Виды: Front / Side / Back. Фон: нейтральный белый. Проекция: ортографическая (без перспективы). Единый масштаб, стопы на одной линии. Свет: равномерный плоский. Подписи ракурсов: [labels_visibility]. Формат: [aspect_ratio], output 4K, sRGB.\nNEG (optional): лишние объекты, искажение анатомии, нарушение пропорций, искажение перспективы, неряшливые линии, непоследовательный стиль, швы в паттерне, виньетка, тени там где не надо, нечитаемый текст/бессмыслица, водяной знак, логотип",
-    "prompt_en": "Character: [description]. Views: Front / Side / Back. Neutral white background. Orthographic projection (no perspective). Consistent scale, feet on same baseline. Flat even lighting. View labels: [labels_visibility]. Format: [aspect_ratio], output 4K, sRGB.\nNEG (optional): perspective, dramatic lighting, watermark"
+    "prompt_ru": "Character sheet [description]: виды Front/Side/Back, белый фон, ортографика без перспективы, единый масштаб и baseline стоп; равномерный свет; подписи: [labels_visibility]. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Character sheet [description]: Front/Side/Back views, white background, orthographic (no perspective), consistent scale and feet baseline; flat even lighting; labels: [labels_visibility]. Format [aspect_ratio], 4K, sRGB."
   },
   "sticker_pack": {
     "title": "21. Набор стикеров",
     "description": "Стикеры с die-cut обводкой.",
-    "prompt_ru": "Sticker pack [character]. Количество: [count]. Эмоции/позы: [list]. Каждый стикер изолирован, равные отступы, единый масштаб персонажа. Белая обводка die-cut одинаковой толщины. Фон: темный контрастный. Стиль: векторный, плоские цвета. Формат: [aspect_ratio], output 4K, sRGB. Без лишнего текста.\nNEG (optional): лишние объекты, искажение анатомии, нарушение пропорций, искажение перспективы, неряшливые линии, непоследовательный стиль, швы в паттерне, виньетка, тени там где не надо, нечитаемый текст/бессмыслица, водяной знак, логотип",
-    "prompt_en": "Sticker pack [character]. Count: [count]. Emotions/poses: [list]. Each sticker isolated, consistent spacing and character scale. Thick white die-cut border with consistent width. Dark contrasting background. Vector, flat colors. Format: [aspect_ratio], output 4K, sRGB. No extra text.\nNEG (optional): inconsistent border, messy spacing, watermark"
+    "prompt_ru": "Sticker pack [character], количество [count], эмоции/позы [list]; каждый стикер изолирован, единый масштаб, равные отступы; белая die-cut обводка одинаковой толщины, тёмный фон. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Sticker pack [character], count [count], emotions/poses [list]; each sticker isolated, consistent scale and spacing; thick white die-cut border, dark background. Format [aspect_ratio], 4K, sRGB."
   },
   "comic_page": {
     "title": "22. Страница комикса",
     "description": "Страница с панелями и читабельным текстом.",
-    "prompt_ru": "Страница комикса: [scene]. 4–6 панелей, gutters одинаковой толщины. Стиль: [style]. Текст (если есть): [language], читабельно, без бессмыслицы. Драматичные тени по стилю. Формат: [aspect_ratio], output 4K, sRGB.\nNEG (optional): лишние объекты, искажение анатомии, нарушение пропорций, искажение перспективы, неряшливые линии, непоследовательный стиль, швы в паттерне, виньетка, тени там где не надо, нечитаемый текст/бессмыслица, водяной знак, логотип",
-    "prompt_en": "Comic page: [scene]. 4–6 panels with uniform gutters. Style: [style]. Text (if any): [language], legible, no gibberish. Dramatic shadows per style. Format: [aspect_ratio], output 4K, sRGB.\nNEG (optional): unreadable text, random watermark"
+    "prompt_ru": "Страница комикса [scene]: 4–6 панелей, ровные gutters; стиль [style]; текст (если есть) на [language], читабельно и без бессмыслицы; драматичные тени по стилю. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Comic page [scene]: 4–6 panels with uniform gutters; style [style]; text (if any) in [language], legible and not gibberish; dramatic shadows per style. Format [aspect_ratio], 4K, sRGB."
   },
   "seamless_pattern": {
     "title": "23. Бесшовный паттерн",
     "description": "Tileable узор для печати.",
-    "prompt_ru": "Бесшовный паттерн. Тема: [theme]. Стиль: [style]. Цвета: [colors]. Критично: края тайла стыкуются идеально со всех сторон (tileable), без швов/разрывов. Плоский 2D, без перспективы/виньетки. Preview mode: [show_preview].\n— Если yes: показать превью 2×2 (четыре повтора) в одном кадре.\n— Если no: один тайл.\nФормат: [aspect_ratio], output 4K, sRGB. Без текста.\nNEG (optional): лишние объекты, искажение анатомии, нарушение пропорций, искажение перспективы, неряшливые линии, непоследовательный стиль, швы в паттерне, виньетка, тени там где не надо, нечитаемый текст/бессмыслица, водяной знак, логотип",
-    "prompt_en": "Seamless pattern. Theme: [theme]. Style: [style]. Colors: [colors]. Critical: edges match perfectly on all sides (tileable), no seams. Flat 2D, no perspective/vignette. Preview mode: [show_preview].\n— yes: show a 2×2 tiled preview in one frame.\n— no: single tile.\nFormat: [aspect_ratio], output 4K, sRGB. No text.\nNEG (optional): seams, vignette, perspective, watermark"
+    "prompt_ru": "Бесшовный паттерн: тема [theme], стиль [style], цвета [colors]; края тайла стыкуются идеально (tileable), плоский 2D без перспективы/виньетки; режим: [show_preview]. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Seamless pattern: theme [theme], style [style], colors [colors]; edges match perfectly (tileable), flat 2D with no perspective/vignette; mode: [show_preview]. Format [aspect_ratio], 4K, sRGB."
   },
   "interior_design": {
     "title": "24. Интерьерный дизайн",
-    "description": "Фотореалистичный интерьер.",
-    "prompt_ru": "Интерьер [room_type]. Стиль: [style]. Материалы: [materials]. Камера: 24–28mm, вертикали ровные (2-point perspective, no keystone). Свет: естественный дневной. Чистые материалы/текстуры, реалистичные тени. Формат: [aspect_ratio], output 4K, sRGB. Без текста/водяных знаков.\nNEG (optional): искажение трапеции (keystone), кривые стены, заваленные вертикали, нереалистичный масштаб, грязная геометрия, текстуры низкого разрешения, ореолы перешарпа, пересветы, грязные тени, мусор/хлам, лишние люди, лишний текст, водяной знак, логотип",
-    "prompt_en": "Interior [room_type]. Style: [style]. Materials: [materials]. Camera: 24–28mm, straight verticals (2-point perspective, no keystone). Natural daylight. Clean materials/textures, realistic shadows. Format: [aspect_ratio], output 4K, sRGB. No text/watermarks.\nNEG (optional): bent walls, keystone distortion, watermark"
+    "description": "Фотореалистичный интерьер с ровными вертикалями.",
+    "prompt_ru": "Интерьер [room_type], стиль [style], материалы [materials]; 24–28mm look, ровные вертикали (2-point, no keystone), естественный дневной свет, чистые текстуры и реалистичные тени. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Interior [room_type], style [style], materials [materials]; 24–28mm look, straight verticals (2-point, no keystone), natural daylight, clean textures and realistic shadows. Format [aspect_ratio], 4K, sRGB."
   },
   "architecture_exterior": {
     "title": "25. Архитектурный экстерьер",
     "description": "Фотореалистичный экстерьер здания.",
-    "prompt_ru": "Экстерьер [building_type]. Окружение: [environment]. Время/погода: [time]. Камера: shift lens, вертикали ровные; объектив [lens]. Ракурс: eye-level или drone. Чистые материалы, корректные тени. Формат: [aspect_ratio], output 4K (8K if available), sRGB. Без текста/водяных знаков.\nNEG (optional): искажение трапеции (keystone), кривые стены, заваленные вертикали, нереалистичный масштаб, грязная геометрия, текстуры низкого разрешения, ореолы перешарпа, пересветы, грязные тени, мусор/хлам, лишние люди, лишний текст, водяной знак, логотип",
-    "prompt_en": "Exterior [building_type]. Environment: [environment]. Time/Weather: [time]. Camera: shift lens, straight verticals; lens look [lens]. Eye-level or drone. Clean materials, accurate shadows. Format: [aspect_ratio], output 4K (8K if available), sRGB. No text/watermarks.\nNEG (optional): warped perspective, tilted building, watermark"
+    "prompt_ru": "Экстерьер [building_type] в окружении [environment], время/погода [time]; ровные вертикали (shift lens), объектив [lens], eye-level или drone, чистые материалы и корректные тени. Формат [aspect_ratio], 4K (8K если доступно), sRGB.",
+    "prompt_en": "Exterior [building_type] in [environment], time/weather [time]; straight verticals (shift lens), lens look [lens], eye-level or drone, clean materials and accurate shadows. Format [aspect_ratio], 4K (8K if available), sRGB."
   },
   "isometric_room": {
     "title": "26. Изометрическая комната",
-    "description": "Изометрический “кукольный домик” без перспективы.",
-    "prompt_ru": "Изометрический срез [room]. Проекция: true isometric 30°/30° (без перспективного схождения). Стиль: [style]. Разрезы чистые, без рваных краев. Однотонный фон: [background_color]. Мягкий глобальный свет. Формат: [aspect_ratio], output 4K, sRGB. Без текста.\nNEG (optional): искажение трапеции (keystone), кривые стены, заваленные вертикали, нереалистичный масштаб, грязная геометрия, текстуры низкого разрешения, ореолы перешарпа, пересветы, грязные тени, мусор/хлам, лишние люди, лишний текст, водяной знак, логотип",
-    "prompt_en": "Isometric cutaway [room]. Projection: true isometric 30°/30° (no convergence). Style: [style]. Clean cutaway edges, no jagged lines. Solid background: [background_color]. Soft global illumination. Format: [aspect_ratio], output 4K, sRGB. No text.\nNEG (optional): perspective convergence, jagged edges, watermark"
+    "description": "Изометрический cutaway без перспективного схождения.",
+    "prompt_ru": "Isometric cutaway [room]: true isometric 30°/30° без схождения, стиль [style], чистые края разреза, однотонный фон [background_color], мягкий глобальный свет. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Isometric cutaway [room]: true isometric 30°/30° with no convergence, style [style], clean cut edges, solid background [background_color], soft global illumination. Format [aspect_ratio], 4K, sRGB."
   },
   "youtube_thumbnail": {
     "title": "27. Обложка YouTube (Viral)",
-    "description": "Вирусное превью 16:9.",
-    "prompt_ru": "YouTube превью. Композиция: 16:9. Тип: [type]. Эмоция лица: [expression]. Лицо 30–40% кадра. Текст строго “[text]” (3–5 слов), крупный, с обводкой/тенью для читаемости. Высокий контраст, насыщенные цвета, без мелкого мусорного текста. Формат: 16:9, output 4K, sRGB. Только при наличии прав/согласия.\nNEG (optional): перебор с bloom (свечением), сильная хроматическая аберрация, избыточные блики, проваленные черные, пересветы, шумные артефакты, ореолы перешарпа, пластиковая кожа, нечитаемый текст, мелкий мусорный текст, водяной знак, логотип",
-    "prompt_en": "YouTube thumbnail. Composition: 16:9. Type: [type]. Face expression: [expression]. Face 30–40% of frame. Text exactly “[text]” (3–5 words), large with stroke/shadow for readability. High contrast, saturated colors, no tiny clutter text. Format: 16:9, output 4K, sRGB. Only with rights/consent.\nNEG (optional): tiny text, unreadable typography, watermark"
+    "description": "Вирусное превью 16:9 (только с правами/согласием).",
+    "prompt_ru": "YouTube thumbnail 16:9: тип [type], эмоция [expression], лицо 30–40% кадра; текст строго “[text]” (3–5 слов), крупный с обводкой/тенью, высокий контраст и насыщенные цвета без мелкого мусора. Формат 16:9, 4K, sRGB. Только при наличии прав/согласия.",
+    "prompt_en": "YouTube thumbnail 16:9: type [type], expression [expression], face 30–40% of frame; text exactly “[text]” (3–5 words), large with stroke/shadow, high contrast and saturated colors with no tiny clutter. Format 16:9, 4K, sRGB. Only with rights/consent."
   },
   "cinematic_atmosphere": {
     "title": "28. Кинематографичная атмосфера",
     "description": "Сцена “как из фильма”.",
-    "prompt_ru": "Сцена из фильма с [subject]. Стиль: [style]. Формат: [aspect_ratio]. Свет: coherent key direction + логичный fill/rim. Объемные лучи, дымка. Эффекты: mild chromatic aberration, film grain, restrained anamorphic flares (без перебора). Cinematic color grading. Формат: [aspect_ratio], output 4K, sRGB. Без текста/водяных знаков.\nNEG (optional): перебор с bloom (свечением), сильная хроматическая аберрация, избыточные блики, проваленные черные, пересветы, шумные артефакты, ореолы перешарпа, пластиковая кожа, нечитаемый текст, мелкий мусорный текст, водяной знак, логотип",
-    "prompt_en": "Movie scene featuring [subject]. Style: [style]. Format: [aspect_ratio]. Coherent key direction + logical fill/rim. Volumetric rays, haze. Effects: mild chromatic aberration, film grain, restrained anamorphic flares (not overdone). Cinematic color grading. Format: [aspect_ratio], output 4K, sRGB. No text/watermarks.\nNEG (optional): heavy aberration, overdone flares, watermark"
+    "prompt_ru": "Кино-сцена с [subject], стиль [style], формат [aspect_ratio]; согласованный key light + fill/rim, дымка и volumetric rays; мягкие эффекты (mild CA, film grain, умеренные flares), cinematic grading. 4K, sRGB. Без текста.",
+    "prompt_en": "Movie scene with [subject], style [style], format [aspect_ratio]; coherent key + fill/rim, haze and volumetric rays; mild effects (CA, film grain, restrained flares), cinematic grading. 4K, sRGB. No text."
   },
   "technical_blueprint": {
     "title": "29. Технический чертеж (Blueprint)",
     "description": "Инженерная схема с размерами.",
-    "prompt_ru": "Чертеж [object]. Виды: front/side/top + cross-section. Проекция ортогональная. Стиль: blueprint/patent (белые линии на синем с сеткой). Единая толщина линий. Размеры с единицами (mm/cm), выноски с читабельным текстом без ошибок. Без шейдинга/теней. Формат: [aspect_ratio], output 4K, sRGB.\nNEG (optional): перебор с bloom (свечением), сильная хроматическая аберрация, избыточные блики, проваленные черные, пересветы, шумные артефакты, ореолы перешарпа, пластиковая кожа, нечитаемый текст, мелкий мусорный текст, водяной знак, логотип",
-    "prompt_en": "Blueprint [object]. Views: front/side/top + cross-section. Orthographic projection. Blueprint/patent style (white lines on blue grid). Consistent line weight. Dimensions with units (mm/cm), readable annotations with correct spelling. No shading/shadows. Format: [aspect_ratio], output 4K, sRGB.\nNEG (optional): shading, sketchy lines, watermark"
+    "prompt_ru": "Blueprint [object]: виды front/side/top + cross-section, ортографика; белые линии на синей сетке, единая толщина линий; размеры с единицами (mm/cm), выноски с читабельным текстом без ошибок. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Blueprint [object]: front/side/top + cross-section, orthographic; white lines on blue grid, consistent line weight; dimensions with units (mm/cm), readable annotations with correct spelling. Format [aspect_ratio], 4K, sRGB."
   },
   "macro_extreme": {
     "title": "30. Макро-съемка (Macro Extreme)",
     "description": "Экстремальный крупный план текстур.",
-    "prompt_ru": "Макро [object]. 100mm macro lens look. Фон: [background]. Свет: [lighting]. Видны микро-текстуры пыли/материала, микронеровности, капли (если нужно). DOF: очень малая, сливочное боке. Focus stacking: [focus_stacking]. Формат: [aspect_ratio], output 4K, sRGB. Без текста/водяных знаков.\nNEG (optional): перебор с bloom (свечением), сильная хроматическая аберрация, избыточные блики, проваленные черные, пересветы, шумные артефакты, ореолы перешарпа, пластиковая кожа, нечитаемый текст, мелкий мусорный текст, водяной знак, логотип",
-    "prompt_en": "Macro [object]. 100mm macro lens look. Background: [background]. Light: [lighting]. Visible micro-texture, dust, grain, tiny imperfections, droplets if needed. Razor-thin DOF, creamy bokeh. Focus stacking: [focus_stacking]. Format: [aspect_ratio], output 4K, sRGB. No text/watermarks.\nNEG (optional): noisy artifacts, excessive sharpening, watermark"
+    "prompt_ru": "Макро [object] на фоне [background], свет [lighting]; видны микро-текстуры/пыль/неровности и капли (если нужно), очень малая DOF и сливочное боке; focus stacking: [focus_stacking]. Формат [aspect_ratio], 4K, sRGB.",
+    "prompt_en": "Macro [object] on [background], lighting [lighting]; visible micro-texture/dust/imperfections and droplets if needed, razor-thin DOF with creamy bokeh; focus stacking: [focus_stacking]. Format [aspect_ratio], 4K, sRGB."
   }
 }
