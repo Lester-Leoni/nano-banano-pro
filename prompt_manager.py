@@ -1,68 +1,58 @@
 import json
 import os
 import re
+from typing import Dict, Any
+
 
 class PromptManager:
-    def __init__(self, filepath='prompts.json'):
-        """
-        Конструктор класса. Запускается автоматически при создании объекта.
-        """
+    VAR_PATTERN = re.compile(r"\[([a-zA-Z0-9_]+)\]")
+
+    def __init__(self, filepath: str = "prompts.json"):
         self.filepath = filepath
         self.prompts = self._load_prompts()
 
-    def _load_prompts(self):
-        """
-        Приватный метод. Читает файл с диска.
-        """
+    def _load_prompts(self) -> Dict[str, Dict[str, Any]]:
         if not os.path.exists(self.filepath):
-            # Если файла нет, создаем пустой словарь, чтобы программа не падала сразу,
-            # но лучше выбросить ошибку, если логика строго требует файл.
-            raise FileNotFoundError(f"Файл базы данных {self.filepath} не найден!")
-        
-        with open(self.filepath, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            # ВАЖНОЕ ИСПРАВЛЕНИЕ:
-            # Наш JSON — это уже словарь {key: value}, поэтому просто возвращаем data.
-            # Не нужно пытаться перебирать его как список.
-            return data
+            raise FileNotFoundError(f"Файл базы данных '{self.filepath}' не найден!")
 
-    def generate(self, prompt_id, language='en', **user_inputs):
-        """
-        Основной метод генерации.
-        """
-        # Шаг 1: Получение шаблона
+        with open(self.filepath, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        if not isinstance(data, dict):
+            raise ValueError("prompts.json должен быть словарём вида {id: {title, description, prompt_ru, prompt_en}}")
+
+        # базовая валидация структуры
+        for pid, item in data.items():
+            if not isinstance(item, dict):
+                raise ValueError(f"Промпт '{pid}' должен быть объектом.")
+            for k in ("title", "description", "prompt_ru", "prompt_en"):
+                if k not in item:
+                    raise ValueError(f"Промпт '{pid}' не содержит ключ '{k}'.")
+
+        return data
+
+    def generate(self, prompt_id: str, language: str = "en", **user_inputs: Any) -> str:
         if prompt_id not in self.prompts:
             raise ValueError(f"Промпт с ID '{prompt_id}' не найден.")
-        
+
         prompt_data = self.prompts[prompt_id]
         key = f"prompt_{language}"
-        
+
         if key not in prompt_data:
-             raise ValueError(f"Язык '{language}' не поддерживается.")
-             
+            raise ValueError(f"Язык '{language}' не поддерживается для '{prompt_id}'.")
+
         template = prompt_data[key]
+        required_vars = set(self.VAR_PATTERN.findall(template))
 
-        # Шаг 2: Валидация
-        # Ищем все переменные в скобках [variable]
-        required_vars = re.findall(r'\[(.*?)\]', template)
-        # Проверяем, есть ли они в переданных user_inputs
-        missing = [var for var in set(required_vars) if var not in user_inputs]
-        
+        missing = [v for v in sorted(required_vars) if v not in user_inputs]
         if missing:
-            # Можно сделать мягче: не ронять программу, а возвращать сообщение об ошибке,
-            # но raise ValueError — это правильный программный подход.
-            raise ValueError(f"Ошибка! Не заполнены обязательные поля: {', '.join(missing)}")
+            raise ValueError(f"Не заполнены обязательные поля: {', '.join(missing)}")
 
-        # Шаг 3: Подстановка
-        final_text = template
-        for key, value in user_inputs.items():
-            # Заменяем [ключ] на значение
-            final_text = final_text.replace(f"[{key}]", str(value))
-            
-        return final_text
+        def repl(match: re.Match) -> str:
+            var = match.group(1)
+            return str(user_inputs.get(var, match.group(0)))
+
+        return self.VAR_PATTERN.sub(repl, template)
 
     def list_available_prompts(self):
-        """
-        Возвращает список доступных ключей (ID) промптов.
-        """
         return list(self.prompts.keys())
