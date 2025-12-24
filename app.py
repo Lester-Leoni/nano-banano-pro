@@ -250,7 +250,7 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-with st.expander(":material/info: Инструкция: Как пользоваться и что значат кнопки?"):
+with st.expander(":material/info: Как пользоваться и что значат кнопки?"):
     st.markdown("""
     ### :material/bolt: Быстрый старт
     1. **Выберите задачу** в меню слева.
@@ -519,12 +519,12 @@ if 'submitted' in locals() and submitted:
                 with col1:
                     st.caption(":material/add_circle: **Positive Prompt**")
                     st.code(res_en, language="text")
-                    st_copy_to_clipboard(res_en, "Коп. Positive", key=f"pos_{hash(res_en)}")
+                    st_copy_to_clipboard(res_en, "Positive", key=f"pos_{hash(res_en)}")
                 
                 with col2:
                     st.caption(f":material/do_not_disturb_on: **Negative Prompt**")
                     st.code(neg_text_en, language="text")
-                    st_copy_to_clipboard(neg_text_en, "Коп. Negative", key=f"neg_{hash(neg_text_en)}")
+                    st_copy_to_clipboard(neg_text_en, "Negative", key=f"neg_{hash(neg_text_en)}")
 
             # --- ВКЛАДКА 2: РУССКИЙ (ПЕРЕВОД) ---
             with tab2:
