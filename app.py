@@ -2,12 +2,12 @@ import streamlit as st
 import streamlit.components.v1 as components
 import re
 import datetime
-# import google.generativeai as genai 
+import os
 from prompt_manager import PromptManager
 from st_copy_to_clipboard import st_copy_to_clipboard
 from deep_translator import GoogleTranslator
 
-# --- 1. НАСТРОЙКИ СТРАНИЦЫ ---
+# --- 1. CONFIG ---
 st.set_page_config(
     page_title="Nano Banano Pro", 
     page_icon="🍌", 
@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. JAVASCRIPT: УБИЙЦА ПОДСКАЗОК ---
+# --- 2. JS CLEANER ---
 components.html(
     """
     <script>
@@ -37,7 +37,7 @@ components.html(
     height=0,
 )
 
-# --- 3. ЛОГИКА ИСТОРИИ ---
+# --- 3. HISTORY ---
 if 'history' not in st.session_state:
     st.session_state['history'] = []
 
@@ -53,188 +53,171 @@ def save_to_history(task, prompt_en, prompt_ru):
     if len(st.session_state['history']) > 50:
         st.session_state['history'].pop()
 
-# --- 4. CSS СТИЛИ (NO GITHUB UI) ---
+# --- 4. CSS (VISUAL FIXES + TRANSPARENT HEADER) ---
 st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
-    /* ============================================================
-       СКРЫВАЕМ ИНТЕРФЕЙС STREAMLIT (GITHUB, FORK, SETTINGS)
-       ============================================================ */
-    [data-testid="stToolbar"] {
-        display: none !important; /* Прячет верхнее меню с Fork */
-    }
-    [data-testid="stHeader"] {
-        background: transparent !important;
-        visibility: hidden !important; /* Прячет хедер полностью */
-    }
-    footer {
-        visibility: hidden !important; /* Прячет надпись "Made with Streamlit" внизу */
-    }
-    [data-testid="stDecoration"] {
-        display: none !important;
-    }
-    
-    .main .block-container { padding-top: 2rem !important; }
+/* =========================================================
+   🍌 HEADER & ARROW FIXES (НОВЫЙ БЛОК)
+   ========================================================= */
 
-    /* ФОНЫ */
-    [data-testid="stAppViewContainer"] {
-        background-color: #0e0e0e;
-        background-image: 
-            radial-gradient(circle at 100% 0%, #332a00 0%, transparent 30%),
-            radial-gradient(circle at 0% 100%, #1a1a1a 0%, transparent 40%);
-        background-attachment: fixed;
-    }
-    [data-testid="stSidebar"] {
-        background-color: #111111 !important; 
-        border-right: 1px solid #333 !important; 
-        background-image: linear-gradient(180deg, #1a1a1a 0%, #111111 100%) !important;
-        padding-top: 1rem !important;
-    }
+/* 1. Делаем хедер полностью прозрачным */
+header[data-testid="stHeader"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
 
-    /* ТЕКСТ ОБЩИЙ */
-    h1, h2, h3, p, label, .stMarkdown, .stCaption, [data-testid="stSidebar"] label, [data-testid="stExpander"] p {
-        color: #e0e0e0 !important;
-        font-family: 'Inter', sans-serif !important; 
-    }
+/* 2. Удаляем цветную полоску декорации (если она есть) */
+[data-testid="stDecoration"] {
+    display: none !important;
+}
 
-    /* ПОЛЯ ВВОДА */
-    div[data-baseweb="base-input"], div[data-baseweb="textarea"] {
-        background-color: #1a1a1a !important;
-        border: 1px solid #444 !important;
-    }
-    div[data-baseweb="base-input"] input, 
-    div[data-baseweb="textarea"] textarea {
-        color: #ffffff !important;       
-        -webkit-text-fill-color: #ffffff !important; 
-        caret-color: #FFD700 !important; 
-        font-weight: 500 !important;
-    }
-    input::placeholder, textarea::placeholder {
-        color: #888888 !important;       
-        -webkit-text-fill-color: #888888 !important;
-        opacity: 1 !important;
-        font-weight: 400 !important;
-    }
-    div[data-baseweb="base-input"]:focus-within, 
-    div[data-baseweb="select"] > div:focus-within,
-    div[data-baseweb="textarea"]:focus-within {
-        border-color: #FFD700 !important; 
-        box-shadow: 0 0 0 1px #FFD700 !important;
-    }
+/* 3. Красим стрелочку (кнопку сайдбара) в ЗОЛОТО */
+button[data-testid="stSidebarCollapsedControl"] {
+    color: #FFD700 !important;
+    border: none !important;
+    background: transparent !important;
+}
+button[data-testid="stSidebarCollapsedControl"]:hover {
+    color: #FFC300 !important;
+    background: transparent !important;
+}
 
-    /* МЕНЮ КАК КНОПКА */
-    div[data-baseweb="select"] { cursor: pointer !important; }
-    div[data-baseweb="select"] * { cursor: pointer !important; user-select: none !important; -webkit-user-select: none !important; }
-    
-    /* ТАБЫ */
-    button[data-baseweb="tab"] {
-        border-radius: 8px !important;
-        margin-right: 6px !important;
-        border: 1px solid transparent !important; 
-        transition: all 0.2s ease !important;
-        padding: 0.5rem 1rem !important;
-    }
-    button[data-baseweb="tab"] div p {
-        color: #e0e0e0 !important;
-        font-family: 'Inter', sans-serif !important;
-        font-weight: 600;
-    }
-    button[data-baseweb="tab"][aria-selected="true"] {
-        background-color: #FFD700 !important;
-        border: none !important;
-        box-shadow: 0 2px 5px rgba(255, 215, 0, 0.2) !important;
-    }
-    button[data-baseweb="tab"][aria-selected="true"] div p {
-        color: #000000 !important;
-        font-weight: 800 !important;
-    }
-    div[data-baseweb="tab-highlight"] { display: none !important; }
+/* 4. Меню "три точки" справа сверху (Toolbar) */
+div[data-testid="stToolbar"] {
+    right: 2rem;
+    top: 0.5rem;
+}
 
-    /* КНОПКИ */
-    div.stButton > button, div.stFormSubmitButton > button {
-        background-color: #FFD700 !important; 
-        border: none !important;
-        padding: 0.7rem 1rem !important;
-        transition: all 0.3s ease !important;
-        width: 100% !important;   
-        border-radius: 8px !important; 
-    }
-    div.stButton > button p, div.stFormSubmitButton > button p {
-        color: #000000 !important; 
-        font-family: 'Inter', sans-serif !important; 
-        font-weight: 700 !important;       
-        text-transform: none !important;   
-        letter-spacing: normal !important; 
-        font-size: 18px !important;
-    }
-    div.stButton > button:hover, div.stFormSubmitButton > button:hover {
-        background-color: #FFC300 !important; 
-        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3) !important;
-        transform: translateY(-1px);
-    }
-    div.stButton > button:hover p, div.stFormSubmitButton > button:hover p { color: #000000 !important; }
+/* Скрываем футер "Made with Streamlit" */
+footer { display: none !important; }
 
-    /* БАННЕР */
-    .main-banner {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
-        border-left: 6px solid #FFD700; 
-        padding: 25px;
-        border-radius: 12px; 
-        margin-bottom: 25px;
-        border: 1px solid rgba(255, 215, 0, 0.15);
-        box-shadow: 0 0 25px rgba(255, 215, 0, 0.25);
-    }
-    .main-banner h1 {
-        margin: 0;
-        color: #FFD700 !important;
-        font-family: 'Inter', sans-serif;
-        font-size: 2.5rem; 
-        font-weight: 700; 
-        letter-spacing: -0.5px;
-        text-shadow: none;
-    }
-    .main-banner p {
-        margin: 8px 0 0 0;
-        font-size: 1.1rem;
-        color: #cccccc !important;
-        font-weight: 400;
-    }
+/* Сдвигаем контент чуть выше, так как хедер теперь прозрачный */
+.main .block-container { 
+    padding-top: 3rem !important; 
+}
 
-    /* ЛОГО */
-    .sidebar-logo {
-        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-        color: black !important;
-        font-family: 'Inter', sans-serif;
-        font-weight: 800;
-        font-size: 1.3rem;
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 10px rgba(255, 215, 0, 0.2);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    
-    .stTooltipIcon { color: #FFD700 !important; }
-    
-    [data-testid="stSidebar"] [data-testid="stVerticalBlock"] > [style*="flex-direction: column;"] > [data-testid="stVerticalBlock"] {
-         background-color: transparent !important;
-    }
+/* =========================================================
+   ⬇️ ТВОЙ ПРОВЕРЕННЫЙ ВИЗУАЛ (БЕЗ ИЗМЕНЕНИЙ)
+   ========================================================= */
 
-    @media only screen and (max-width: 600px) {
-        .main-banner h1 { font-size: 1.8rem !important; }
-        .main-banner p { font-size: 1rem !important; }
-        .main-banner { padding: 15px !important; margin-bottom: 15px !important; }
-        div.stButton > button p, div.stFormSubmitButton > button p { font-size: 16px !important; }
-        .block-container { padding-left: 1rem !important; padding-right: 1rem !important; }
-    }
-    </style>
-    """, unsafe_allow_html=True)
+/* ФОНЫ */
+[data-testid="stAppViewContainer"] {
+    background-color: #0e0e0e;
+    background-image: 
+        radial-gradient(circle at 100% 0%, #332a00 0%, transparent 30%),
+        radial-gradient(circle at 0% 100%, #1a1a1a 0%, transparent 40%);
+    background-attachment: fixed;
+}
+[data-testid="stSidebar"] {
+    background-color: #111111 !important; 
+    border-right: 1px solid #333 !important; 
+    background-image: linear-gradient(180deg, #1a1a1a 0%, #111111 100%) !important;
+    padding-top: 1rem !important;
+}
 
-# --- 5. ЗАГОЛОВОК ---
+/* ТЕКСТ ОБЩИЙ */
+h1, h2, h3, p, label, .stMarkdown, .stCaption, [data-testid="stSidebar"] label, [data-testid="stExpander"] p {
+    color: #e0e0e0 !important;
+    font-family: 'Inter', sans-serif !important; 
+}
+
+/* ПОЛЯ ВВОДА */
+div[data-baseweb="base-input"], div[data-baseweb="textarea"] {
+    background-color: #1a1a1a !important;
+    border: 1px solid #444 !important;
+}
+div[data-baseweb="base-input"] input, 
+div[data-baseweb="textarea"] textarea {
+    color: #ffffff !important;       
+    -webkit-text-fill-color: #ffffff !important; 
+    caret-color: #FFD700 !important; 
+    font-weight: 500 !important;
+}
+input::placeholder, textarea::placeholder {
+    color: #888888 !important;       
+    -webkit-text-fill-color: #888888 !important;
+    opacity: 1 !important;
+    font-weight: 400 !important;
+}
+div[data-baseweb="base-input"]:focus-within, 
+div[data-baseweb="select"] > div:focus-within,
+div[data-baseweb="textarea"]:focus-within {
+    border-color: #FFD700 !important; 
+    box-shadow: 0 0 0 1px #FFD700 !important;
+}
+
+/* МЕНЮ КАК КНОПКА */
+div[data-baseweb="select"] { cursor: pointer !important; }
+div[data-baseweb="select"] * { cursor: pointer !important; user-select: none !important; -webkit-user-select: none !important; }
+
+/* ТАБЫ */
+button[data-baseweb="tab"] {
+    border-radius: 8px !important;
+    margin-right: 6px !important;
+    border: 1px solid transparent !important; 
+    transition: all 0.2s ease !important;
+    padding: 0.5rem 1rem !important;
+}
+button[data-baseweb="tab"] div p {
+    color: #e0e0e0 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600;
+}
+button[data-baseweb="tab"][aria-selected="true"] {
+    background-color: #FFD700 !important;
+    border: none !important;
+    box-shadow: 0 2px 5px rgba(255, 215, 0, 0.2) !important;
+}
+button[data-baseweb="tab"][aria-selected="true"] div p {
+    color: #000000 !important;
+    font-weight: 800 !important;
+}
+div[data-baseweb="tab-highlight"] { display: none !important; }
+
+/* КНОПКИ */
+div.stButton > button, div.stFormSubmitButton > button {
+    background-color: #FFD700 !important; 
+    border: none !important;
+    padding: 0.7rem 1rem !important;
+    transition: all 0.3s ease !important;
+    width: 100% !important;   
+    border-radius: 8px !important; 
+}
+div.stButton > button p, div.stFormSubmitButton > button p {
+    color: #000000 !important; 
+    font-family: 'Inter', sans-serif !important; 
+    font-weight: 700 !important;       
+    text-transform: none !important;   
+    letter-spacing: normal !important; 
+    font-size: 18px !important;
+}
+div.stButton > button:hover, div.stFormSubmitButton > button:hover {
+    background-color: #FFC300 !important; 
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3) !important;
+    transform: translateY(-1px);
+}
+div.stButton > button:hover p, div.stFormSubmitButton > button:hover p { color: #000000 !important; }
+
+/* BANNER */
+.main-banner {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-left: 6px solid #FFD700;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.25);
+}
+.main-banner h1 { color: #FFD700 !important; }
+
+</style>
+""", unsafe_allow_html=True)
+
+# --- 5. BANNER ---
 st.markdown("""
     <div class="main-banner">
         <h1>🍌 Nano Banano Pro</h1>
@@ -251,7 +234,7 @@ with st.expander("Как пользоваться? (Нажмите, чтобы �
     """)
 st.write("---") 
 
-# --- 6. СЛОВАРИ ---
+# --- 6. DATA DICTS ---
 VAR_MAP = {
     "image_1": "Исходное фото / Ссылка",
     "image_2": "Второе фото / Референс",
@@ -291,7 +274,6 @@ VAR_MAP = {
     "room_type": "Какая комната?"
 }
 
-# --- ПОЛНАЯ БАЗА ПРИМЕРОВ ---
 EXAMPLES_DB = {
     "image_1": {"ph": "Вставьте ссылку (Ctrl+V) или опишите словами...", "help": "Основная картинка для обработки."},
     "image_2": {"ph": "Ссылка на вторую картинку...", "help": "Картинка, откуда берем лицо, одежду или стиль."},
@@ -321,28 +303,28 @@ EXAMPLES_DB = {
     "screen_type": {"ph": "Напр: Главная страница, Профиль, Корзина, Настройки...", "help": "Какой экран приложения рисуем?"},
     "room_type": {"ph": "Напр: Лофт-гостиная, Спальня в скандинавском стиле, Кухня...", "help": "Тип помещения для дизайна."},
     "design_style": {"ph": "Напр: Минимализм, Гранж, Лакшери...", "help": "Общий стиль дизайна."},
-    
-    # --- НОВЫЕ ПРИМЕРЫ (FIXED) ---
     "emotions": {"ph": "Напр: Доверие и надежность, Игривое и детское, Строгое и премиальное...", "help": "Какое чувство должен вызывать логотип у клиента?"},
     "element_1": {"ph": "Напр: Огромный робот, Кот-космонавт, Старинный замок...", "help": "Первый главный объект сцены."},
     "element_2": {"ph": "Напр: Маленькая девочка с цветком, НЛО, Рыцарь...", "help": "Второй объект, с которым взаимодействует первый."},
     "scene_description": {"ph": "Напр: Робот дарит цветок девочке на закате. Контраст масштабов...", "help": "Опишите, что происходит между этими объектами."}
 }
 
-# --- ИНИЦИАЛИЗАЦИЯ ДВИЖКА ---
+# --- 7. ENGINE ---
 @st.cache_resource
 def load_engine():
+    if not os.path.exists('prompts.json'):
+        return None
     return PromptManager('prompts.json')
 
-try:
-    manager = load_engine()
-except Exception as e:
-    st.error(f"❌ Ошибка загрузки базы данных: {e}")
+manager = load_engine()
+
+if not manager:
+    st.error("❌ Файл `prompts.json` не найден. Загрузите его в ту же папку.")
     st.stop()
 
-# --- 7. САЙДБАР ---
+# --- 8. SIDEBAR ---
 with st.sidebar:
-    st.markdown('<div class="sidebar-logo">🍌 PRO MENU</div>', unsafe_allow_html=True)
+    st.button("🍌 PRO MENU", key="promenu_btn", use_container_width=True)
     tab_menu, tab_history = st.tabs(["Меню", "История"])
 
 all_prompts = manager.prompts
@@ -356,7 +338,7 @@ with tab_menu:
     with st.container(border=True):
         st.info(current_prompt_data['description'])
 
-# --- 8. ОСНОВНАЯ ЗОНА ---
+# --- 9. MAIN FORM ---
 st.subheader(f"{selected_title}")
 
 template = current_prompt_data['prompt_en']
@@ -372,16 +354,13 @@ else:
         cols = st.columns(2)
         for i, var in enumerate(required_vars):
             col = cols[i % 2]
-            # Берем человеческое название из VAR_MAP, если нет - оставляем как есть
             label = VAR_MAP.get(var, f"Введите {var}")
-            
-            # Берем данные из EXAMPLES_DB, если нет - ставим заглушку
             example_data = EXAMPLES_DB.get(var, {})
             placeholder_text = example_data.get("ph", f"Пример...")
             help_text = example_data.get("help", "")
 
             user_inputs[var] = col.text_input(
-                label, 
+                label,
                 key=var,
                 placeholder=placeholder_text,
                 help=help_text
@@ -390,7 +369,7 @@ else:
         st.write("---")
         submitted = st.form_submit_button("🍌 Сгенерировать Промпт", use_container_width=True)
 
-# --- 9. ЛОГИКА ГЕНЕРАЦИИ ---
+# --- 10. GENERATION LOGIC ---
 if 'submitted' in locals() and submitted:
     missing = [VAR_MAP.get(k, k) for k, v in user_inputs.items() if not v]
     
@@ -437,7 +416,7 @@ if 'submitted' in locals() and submitted:
         except Exception as e:
             st.error(f"❌ Ошибка генерации или перевода: {e}")
 
-# --- 10. ИСТОРИЯ ---
+# --- 11. HISTORY OUTPUT ---
 with tab_history:
     st.write(" ")
     if st.button("Очистить историю"):
