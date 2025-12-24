@@ -1,205 +1,182 @@
-[
-  {
-    "id": "upscale_restore",
+{
+  "upscale_restore": {
     "title": "01. Улучшение качества (Re-Imagine)",
-    "description": "Перерисовывает изображение в высоком разрешении, сохраняя черты.",
-    "prompt_ru": "Создать высокодетализированную фотореалистичную версию изображения [image_1]. Критически важно: сохранить оригинальную композицию, позу и черты лица на 100%. Улучшить текстуру кожи, сделав её естественной (видны поры), устранить размытость и артефакты сжатия. Освещение должно быть идентично оригиналу. Результат — четкая фотография 8k.",
-    "prompt_en": "Generate a high-fidelity photorealistic recreation of [image_1]. Critical priority: strictly preserve the exact composition, pose, and facial identity of the original image. Enhance image quality by resolving blur and artifacts. Restore authentic skin texture with visible pores and natural subsurface scattering, avoiding a plastic look. Keep the original lighting and color grading exactly as they are. Output a sharp, 8k photography-quality image."
+    "description": "Восстанавливает детали и кожу, не меняя суть.",
+    "prompt_ru": "Создать высокодетализированную версию [image_1]. Сохранить: композицию, кадрирование, позу, возраст, прическу, макияж и идентичность лица строго 1:1. Улучшить: четкость, микродетали, текстуру кожи (поры/пушок), убрать размытость и артефакты сжатия. Технически: сохранить исходное film grain (пленочное зерно), без художественной стилизации, без “beauty”-перелицовки. Формат: [aspect_ratio], output 4K, sRGB. Без лишнего текста/водяных знаков.\nNEG (optional): plastic skin, waxy, beauty retouch, face reshape, over-smoothing, extra text, watermark",
+    "prompt_en": "Generate a high-fidelity recreation of [image_1]. Keep: composition, cropping, pose, age, hairstyle, makeup, and facial identity strictly 1:1. Enhance: clarity, micro-detail, natural skin texture (pores/vellus hair), remove blur and compression artifacts. Technical: retain original film grain, no artistic restyling, no beauty reshaping. Format: [aspect_ratio], output 4K, sRGB. No extra text/watermarks.\nNEG (optional): plastic skin, waxy, beauty retouch, face reshape, over-smoothing, extra text, watermark"
   },
-  {
-    "id": "studio_portrait",
+  "studio_portrait": {
     "title": "02. Студийный портрет (High-End)",
-    "description": "Портрет уровня обложки Vogue. Идеальный свет и кожа.",
-    "prompt_ru": "Профессиональный студийный портрет [person] на фоне [background]. Снято с ракурса [angle]. Освещение: [lighting]. Использовать объектив 85mm с диафрагмой f/1.8 для мягкого боке. Фокус строго на глазах. Текстура кожи должна быть ультра-реалистичной, с пушком и порами. Эстетика дорогого глянцевого журнала Vogue.",
-    "prompt_en": "A high-end editorial studio portrait of [person] set against a [background]. The shot is taken from a [angle] angle using an 85mm lens at f/1.8, creating a shallow depth of field with sharp focus on the eyes. Lighting setup: [lighting]. The skin texture must be ultra-detailed, showing realistic pores and vellus hair. Capture the aesthetic of a premium Vogue magazine cover in 8k resolution."
+    "description": "Портрет уровня Vogue.",
+    "prompt_ru": "High-end студийный портрет [person] на фоне [background]. Освещение: [lighting]. Камера: medium format look (~100MP), объектив 85mm f/1.8. Детали: фокус строго на глазах, мягкое боке. Кожа ультра-реалистичная (поры + пушок), без “пластика”. Не менять черты лица ретушью и не менять возраст. Фон/композицию не менять, если не указано иначе. Формат: [aspect_ratio], output 4K, sRGB. Без лишнего текста/водяных знаков.\nNEG (optional): plastic skin, over-retouch, beauty reshape, extra text, watermark",
+    "prompt_en": "High-end studio portrait of [person] against [background]. Lighting: [lighting]. Camera: medium format look (~100MP), 85mm lens at f/1.8. Details: tack-sharp focus on eyes, soft bokeh. Ultra-real skin (pores + vellus hair), no plastic look. Do not alter facial features or age via retouching. Keep background/composition unless specified. Format: [aspect_ratio], output 4K, sRGB. No extra text/watermarks.\nNEG (optional): plastic skin, over-retouch, beauty reshape, extra text, watermark"
   },
-  {
-    "id": "scene_composition_complex",
-    "title": "03. Сложная композиция (Environment)",
-    "description": "Помещает персонажа в новое детальное окружение.",
-    "prompt_ru": "Фотомонтаж: Поместить персонажа с [image_1] в новое окружение: [background]. Добавить элементы фона: [additional_objects]. Атмосфера: [atmosphere]. Глобальное освещение должно объединять персонажа и фон, создавая правильные цветные рефлексы и тени. Фотореалистичный результат.",
-    "prompt_en": "Advanced photographic composite: Place the subject from [image_1] into a completely new environment: [background]. Integrate background elements: [additional_objects]. Atmosphere and weather: [atmosphere]. Ensure Global Illumination unifies the subject with the scene, casting accurate contact shadows and blending ambient colors onto the skin and clothing. The result must be indistinguishable from a real photograph."
+  "background_change": {
+    "title": "03. Замена фона (Background Change)",
+    "description": "Переносит персонажа в новую локацию.",
+    "prompt_ru": "[image_1] = персонаж (Keep), [background] = новое окружение. Действие: изолировать персонажа и поместить в новый фон. Критично: match lighting, match DOF, match film grain (без цифрового шума). Добавить реалистичную контактную тень под ногами/опорой. Совместить линию горизонта/точку схода, корректный масштаб, совпадение “ощущения фокусного” и высоты камеры. Формат: [aspect_ratio], output 4K, sRGB. Без швов/ореолов/текста.",
+    "prompt_en": "[image_1] = subject (Keep), [background] = new environment. Action: isolate subject and composite into new background. Critical: match lighting, DOF, and film grain (avoid digital noise). Add realistic ground contact shadow. Align horizon/vanishing point, correct scale, match focal-length feel and camera height. Format: [aspect_ratio], output 4K, sRGB. No seams/halos/text.\nNEG (optional): halo, cutout edges, seam, extra text, watermark"
   },
-  {
-    "id": "expression_change",
-    "title": "04. Изменение эмоции",
-    "description": "Коррекция мимики с сохранением лица.",
-    "prompt_ru": "Изменить выражение лица человека на [image_1] на [emotion]. Строго сохранить узнаваемость (Identity) и остальные детали. Добавить естественные микровыражения (морщинки вокруг глаз, напряжение мышц).",
-    "prompt_en": "Modify the facial expression of the person in [image_1] to reflect [emotion]. It is crucial to strictly preserve the original Facial Identity and likeness. Introduce natural micro-expressions such as eye crinkles and realistic mouth shape adjustments suitable for this emotion."
+  "face_swap": {
+    "title": "04. Замена лица (Face Swap)",
+    "description": "Меняет лицо, сохраняя сцену.",
+    "prompt_ru": "[image_1] = сцена/тело, [image_2] = донор лица. Действие: заменить ТОЛЬКО facial region, не трогая волосы/уши/контур черепа/шею. Сохранить: направление взгляда, освещение и тон кожи сцены. Технически: бесшовный inpainting по краям, совпадение film grain и цветокоррекции. Формат: [aspect_ratio], output 4K, sRGB. Без артефактов/ореолов/текста.",
+    "prompt_en": "[image_1] = scene/body, [image_2] = donor face. Action: swap ONLY the facial region; do not change hair/ears/skull outline/neck. Keep: eye direction, original lighting and scene skin tone. Technical: seamless inpainting blend, match film grain and color grading. Format: [aspect_ratio], output 4K, sRGB.\nNEG (optional): mismatched skin, hard edges, halo, extra text, watermark"
   },
-  {
-    "id": "subject_swap",
-    "title": "05. Замена персонажа (Identity Swap)",
-    "description": "Вставляет нового героя в существующую сцену.",
-    "prompt_ru": "Заменить человека на [image_1] на персонажа [image_2] (или описание). Сохранить черты лица [image_2], но идеально вписать его в перспективу, масштаб и освещение сцены [image_1]. Цветокоррекция кожи должна соответствовать окружению.",
-    "prompt_en": "Replace the subject in [image_1] with the character from [image_2]. Strictly preserve the facial identity and features of [image_2]. The new character must perfectly match the perspective, scale, and lighting conditions of the original scene [image_1]. Apply color grading to the skin tone to ensure it interacts naturally with the environment's light."
+  "expression_change": {
+    "title": "05. Изменение эмоции",
+    "description": "Коррекция мимики без смены личности.",
+    "prompt_ru": "Изменить эмоцию на [image_1] на: [emotion]. Интенсивность: [intensity]. Сохранить: identity, форму лица, наклон головы, прическу, макияж, освещение. Зубы/прикус не менять (если не требуется улыбка). Детали: естественные микровыражения (морщинки вокруг глаз, работа мышц, форма рта). Формат: [aspect_ratio], output 4K, sRGB. Без артефактов/текста.",
+    "prompt_en": "Change expression in [image_1] to: [emotion]. Intensity: [intensity]. Keep: identity, facial structure, head tilt, hairstyle, makeup, lighting. Do not change teeth/bite (unless smiling is required). Details: natural micro-expressions (eye crinkles, muscle tension, accurate mouth shape). Format: [aspect_ratio], output 4K, sRGB. No artifacts/text.\nNEG (optional): face warp, identity drift, extra text, watermark"
   },
-  {
-    "id": "cloth_swap",
-    "title": "06. Замена одежды (Virtual Try-On)",
-    "description": "Меняет одежду, сохраняя позу и фигуру.",
-    "prompt_ru": "Одеть персонажа с [image_1] в наряд: [image_2] (или описание). Строго сохранить исходную позу и пропорции тела. Ткань должна реалистично облегать фигуру, создавая правильные складки и натяжение в зависимости от материала. Освещение на одежде должно совпадать со сценой.",
-    "prompt_en": "Digitally change the clothing on the subject in [image_1] to match the outfit from [image_2]. Strictly preserve the original pose and body proportions. The new fabric must drape physically accurately, showing realistic folds, tension, and weight appropriate for the material. Match the lighting and shadows on the new clothes to the original scene for a seamless integration."
+  "cloth_swap": {
+    "title": "06. Виртуальная примерка (Virtual Try-On)",
+    "description": "Меняет одежду, сохраняя позу и тело.",
+    "prompt_ru": "[image_1] = модель, [image_2] = одежда. Материал: [fabric_material]. Сохранить: лицо, руки, волосы, аксессуары, позу, фон и освещение (если не указано иначе). Изменить: только одежду. Физика ткани: складки/натяжение/вес/толщина, корректный bounce light. Match DOF + match film grain обязательно. Формат: [aspect_ratio], output 4K, sRGB. Без артефактов/текста.",
+    "prompt_en": "[image_1] = model, [image_2] = outfit. Material: [fabric_material]. Keep: face, hands, hair, accessories, pose, background and lighting unless specified. Change: clothing only. Fabric physics: folds/tension/weight/thickness, correct bounce light. Match DOF + match film grain. Format: [aspect_ratio], output 4K, sRGB. No artifacts/text.\nNEG (optional): body warp, extra limbs, cloth clipping, extra text, watermark"
   },
-  {
-    "id": "object_removal",
+  "object_removal": {
     "title": "07. Удаление объекта (Inpainting)",
-    "description": "Удаляет лишнее, интеллектуально дорисовывая фон.",
-    "prompt_ru": "Удалить [object] с изображения [image_1]. Заполнить пустоту фоном, используя контекстное понимание сцены (inpainting). Восстановить текстуры, шумы и освещение, чтобы не осталось следов редактирования. Чистая композиция.",
-    "prompt_en": "Remove the [object] from image [image_1]. Use context-aware inpainting to flawlessly fill the void. Reconstruct the background by matching the texture, noise grain, and lighting of the surrounding areas. Ensure there are no artifacts, ghosting, or seams. The result should look like a clean, original photograph."
+    "description": "Удаляет объект и его следы.",
+    "prompt_ru": "Удалить [object] с [image_1]. Критично: удалить также падающую тень, отражение, блики и spill light от объекта. Заполнить (inpaint) контекстно, восстановить текстуры/резкость/film grain без замыливания. Сохранить геометрию линий (плитка/стены) и перспективу. Формат: [aspect_ratio], output 4K, sRGB. Без “призраков”, швов, текста.",
+    "prompt_en": "Remove [object] from [image_1]. Critical: also remove cast shadows, reflections, highlights, and spill light. Context-aware inpainting; restore textures/sharpness/film grain without smearing. Preserve line geometry and perspective. Format: [aspect_ratio], output 4K, sRGB. No ghosting, seams, text.\nNEG (optional): ghosting, smear, seam, extra text, watermark"
   },
-  {
-    "id": "object_addition",
-    "title": "08. Добавление объекта (Product)",
-    "description": "Внедряет предмет в сцену с тенями.",
-    "prompt_ru": "Вставить [object] в сцену [image_1]. Объект должен быть в правильной перспективе и масштабе. Обязательно создать реалистичную отбрасываемую тень и отражения окружения на поверхности объекта. Фотореализм.",
-    "prompt_en": "Insert a [object] into the scene [image_1]. Ensure the object aligns with the correct perspective and scale. Mandatory: render realistic cast shadows matching the light direction, and include ambient reflections on the object's surface. The composite must look photorealistic."
+  "object_addition": {
+    "title": "08. Добавление предмета (Object Addition)",
+    "description": "Вставляет новый объект в сцену.",
+    "prompt_ru": "Вставить [object] в [image_1]. Место: [placement_details]. Обязательно: совпадение перспективы, масштаба, высоты камеры, DOF. Физика: отбрасываемая тень + контактная AO. Цвет: match white balance, match color temperature, match film grain (без цифрового шума). Отражения: если поверхность отражающая (glossy/mirror) — добавить физически правдоподобное отражение. Формат: [aspect_ratio], output 4K, sRGB. Без артефактов/текста.",
+    "prompt_en": "Insert [object] into [image_1]. Placement: [placement_details]. Must match perspective, scale, camera height, and DOF. Physics: cast shadow + contact AO. Color: match white balance, color temperature, and film grain (avoid digital noise). Reflections: if the surface is reflective (glossy/mirror), add physically plausible reflection. Format: [aspect_ratio], output 4K, sRGB. No artifacts/text.\nNEG (optional): floating object, wrong shadow, mismatch grain, extra text, watermark"
   },
-  {
-    "id": "character_sheet",
-    "title": "09. Лист персонажа (GameDev)",
-    "description": "Генерация персонажа в трех ракурсах.",
-    "prompt_ru": "Создать профессиональный концепт-арт (Character Sheet) для персонажа: [character_description]. Компоновка: три ракурса в ряд (Вид спереди, Вид сбоку, Вид сзади). Нейтральный белый фон. Стиль: [style]. Равномерное освещение для 3D-моделирования. Высокая детализация костюма.",
-    "prompt_en": "Create a professional character design sheet for: [character_description]. Layout: Three distinct views side-by-side (Front view, Side view, Back view). Background: Neutral white. Style: [style]. Use even, flat lighting optimized for 3D modeling reference. Ensure high clarity of costume details and anatomy."
+  "scene_relighting": {
+    "title": "09. Смена освещения (Relighting)",
+    "description": "Меняет световой сценарий, не меняя сцены.",
+    "prompt_ru": "Relight [image_1]. Условие: [lighting_condition]. Сохранить: геометрию и материалы/текстуры; если есть люди — identity. Изменить: направление теней, температуру, интенсивность, спекулярные блики. Важно: не “редизайнить” материалы — менять только свет/тени/блики. Один согласованный key light + логичный fill/rim (если нужно). Формат: [aspect_ratio], output 4K, sRGB. Без текста/водяных знаков.",
+    "prompt_en": "Relight [image_1]. Condition: [lighting_condition]. Keep: geometry and materials/textures; if people exist—identity. Change: shadow direction, temperature, intensity, specular highlights. Important: do not redesign materials—only update lighting/shadows/highlights. One coherent key + logical fill/rim if needed. Format: [aspect_ratio], output 4K, sRGB. No text/watermarks.\nNEG (optional): texture repaint, material change, extra text, watermark"
   },
-  {
-    "id": "sticker_pack",
-    "title": "10. Набор стикеров",
-    "description": "Пак стикеров с белой обводкой.",
-    "prompt_ru": "Набор стикеров (Sticker sheet) с персонажем: [character_description]. Эмоции: Счастье, Гнев, Шок, Любовь. Стиль: Векторная графика, яркие плоские цвета. Обязательно: широкая белая обводка (die-cut border) вокруг каждого стикера. Темный фон.",
-    "prompt_en": "A sticker sheet featuring [character_description]. Display multiple emotions/poses: Happy, Angry, Shocked, Love. Style: Vector graphic art with flat, vibrant colors. Mandatory: A thick white die-cut border surrounding each individual sticker. Isolated on a dark background."
+  "scene_composite": {
+    "title": "10. Сложный фотомонтаж (Global Composite)",
+    "description": "Собирает одну сцену из нескольких элементов.",
+    "prompt_ru": "[element_1] = основа (base plate), [element_2] = вставка (insert). Сцена: [scene_description]. Match: масштаб, перспектива, высоты камеры, WB/цветокоррекция, film grain, DOF, контактные тени/окклюзия. Lens match mode: [lens_match_mode].\n— Если feel: подогнать “ощущение фокусного” (lens look) так, чтобы выглядело как один снимок.\n— Если strict: match focal length (эквивалентное фокусное) строго.\nФормат: [aspect_ratio], output 4K, sRGB. Без швов/ореолов/текста.",
+    "prompt_en": "[element_1] = base plate, [element_2] = insert. Scene: [scene_description]. Match: scale, perspective, camera height, WB/color grading, film grain, DOF, contact shadows/occlusion. Lens match mode: [lens_match_mode].\n— feel: match lens look / focal-length feel so it reads as one photo.\n— strict: match focal length strictly.\nFormat: [aspect_ratio], output 4K, sRGB. No seams/halos/text.\nNEG (optional): mismatch perspective, halo, seam, extra text, watermark"
   },
-  {
-    "id": "ui_design",
-    "title": "11. Дизайн интерфейса (UI/UX)",
-    "description": "Макет мобильного приложения.",
-    "prompt_ru": "Высококачественный дизайн интерфейса мобильного приложения для [industry_brand]. Экран: [screen_type]. Цветовая палитра: [colors]. Стиль: [design_style] (например, Clean, Minimal). Современная типографика без ошибок, трендовые иконки. Презентация в стиле Dribbble.",
-    "prompt_en": "High-fidelity Mobile App UI/UX design for [industry_brand]. Screen type: [screen_type]. Color palette: [colors]. Style: [design_style]. Use modern typography, pixel-perfect icons, and a user-centric layout. The design should look like a trending showcase on Dribbble or Behance."
+  "product_card": {
+    "title": "11. Карточка товара (Product Card)",
+    "description": "Инфографика для маркетплейсов.",
+    "prompt_ru": "Дизайн карточки для [product] на основе [image_1]. Пропорции: [aspect_ratio]. Композиция: продукт 50–60% кадра. Инфографика: текст строго “[text]” + иконки/фичи [features_list]. Технически: safe margins 5–8%, текст не перекрывает товар/детали, читабельность на мобильном. Типографика без ошибок и “битых” букв. Формат: [aspect_ratio], output 4K, sRGB. Без водяных знаков.",
+    "prompt_en": "Product card for [product] based on [image_1]. Aspect ratio: [aspect_ratio]. Layout: product 50–60% of frame. Infographics: text exactly “[text]” + feature icons [features_list]. Technical: 5–8% safe margins, no overlap on key details, mobile-readable. Clean typography with strict spell-check. Format: [aspect_ratio], output 4K, sRGB. No watermarks.\nNEG (optional): tiny unreadable text, broken letters, watermark"
   },
-  {
-    "id": "interior_design",
-    "title": "12. Интерьерный дизайн",
-    "description": "Визуализация помещений.",
-    "prompt_ru": "Фотореалистичная визуализация интерьера: [room_type]. Стиль: [design_style]. Цвета: [colors]. Основные материалы: [materials]. Естественное дневное освещение. Ракурс: [angle]. Качество уровня журнала Architectural Digest.",
-    "prompt_en": "Photorealistic interior design visualization of a [room_type]. Style: [design_style]. Color palette: [colors]. Key materials: [materials]. Lighting: Soft natural daylight creating a cozy atmosphere. Camera angle: [angle]. Render quality comparable to Architectural Digest photography, 8k."
+  "mockup_generation": {
+    "title": "12. Генерация мокапа (Mockup)",
+    "description": "Наносит дизайн на объект, сохраняя читаемость.",
+    "prompt_ru": "Наложить дизайн на 3D-модель [object_type]. Фон: [background_type]. Покрытие: [print_finish]. Критично: текст/логотип читаемы; деформация только по кривизне поверхности. Студийный свет, корректные блики/материал. Без сторонних логотипов/водяных знаков. Формат: [aspect_ratio], output 4K, sRGB.",
+    "prompt_en": "Map design onto a 3D model of [object_type]. Background: [background_type]. Finish: [print_finish]. Critical: text/logo remains legible; warp only by surface curvature. Studio lighting, correct highlights/material response. No extra logos/watermarks. Format: [aspect_ratio], output 4K, sRGB.\nNEG (optional): unreadable logo, random brand, watermark"
   },
-  {
-    "id": "mockup_generation",
-    "title": "13. Создание мокапа (Mockup)",
-    "description": "Натягивает дизайн на реальный объект.",
-    "prompt_ru": "Профессиональный продуктовый мокап. Наложить дизайн на 3D-модель [object_type]. Фон: [background_type]. Учесть изгибы поверхности, текстуру материала и блики. Студийный свет. Рекламный вид.",
-    "prompt_en": "Professional product mockup. Map the provided design onto a realistic 3D model of a [object_type]. Background: [background_type]. Accurate surface curvature, material texture, and specular highlights. Studio lighting. Commercial product photography look."
+  "knolling_photography": {
+    "title": "13. Кноллинг (Knolling / Flat Lay)",
+    "description": "Аккуратная раскладка предметов сверху.",
+    "prompt_ru": "Knolling [object]. Фон: [background]. Строгий вид сверху, сетка 90°, равные отступы, организованная композиция. Свет: мягкий diffused, почти бестеневой + лёгкая контактная окклюзия (чтобы предметы не “парили”). Высокая резкость. Формат: [aspect_ratio], output 4K, sRGB. Без текста/водяных знаков.",
+    "prompt_en": "Knolling [object]. Background: [background]. Strict top-down, 90° grid, consistent spacing, organized layout. Lighting: soft diffused near-shadowless + subtle contact occlusion (no floating). High sharpness. Format: [aspect_ratio], output 4K, sRGB. No text/watermarks.\nNEG (optional): clutter, perspective tilt, watermark"
   },
-  {
-    "id": "knolling_photography",
-    "title": "14. Кноллинг (Knolling)",
-    "description": "Аккуратная раскладка предметов.",
-    "prompt_ru": "Фотография в стиле Кноллинг (Knolling) для [object]. Предметы аккуратно разложены по сетке под прямым углом. Фон: [background]. Вид строго сверху. Мягкое бестеневое освещение. Высокая резкость.",
-    "prompt_en": "Knolling style photography featuring [object]. Items are neatly arranged in a grid pattern at 90-degree angles. Background: [background]. View: Strict top-down. Lighting: Soft and shadowless. High sharpness and organized aesthetic."
+  "logo_creative": {
+    "title": "14. Логотип (Logo Creative)",
+    "description": "Чистый векторный логотип.",
+    "prompt_ru": "Логотип для [brand]. Образ: [imagery]. Стиль: [style]. Технически: плоские векторные формы, чистые линии, 1:1, белый фон, чистые отступы. Текст (если есть) без ошибок. Формат: 1:1 (или [aspect_ratio]), output 4K, sRGB.",
+    "prompt_en": "Logo for [brand]. Imagery: [imagery]. Style: [style]. Technical: flat vector shapes, clean lines, centered 1:1 on white, clear margins. Perfect spelling for any text. Format: 1:1 (or [aspect_ratio]), output 4K, sRGB.\nNEG (optional — рекомендовано): photorealistic, mockup, 3d, render, gradients, textures, shadows, realistic lighting, watermark"
   },
-  {
-    "id": "seamless_pattern",
-    "title": "15. Бесшовный паттерн",
-    "description": "Узор для печати или фонов.",
-    "prompt_ru": "Бесшовный повторяющийся паттерн. Тема: [imagery]. Стиль: [style]. Цвета: [colors]. Плоский вид 2D, без теней и перспективы. Готов к печати на ткани.",
-    "prompt_en": "A seamless, tileable repeating pattern. Theme: [imagery]. Style: [style]. Colors: [colors]. Flat 2D vector view, no shadows, no perspective. Ready for textile printing or wallpaper."
+  "logo_stylization": {
+    "title": "15. 3D Логотип (Logo Stylization)",
+    "description": "Логотип, собранный из материалов/предметов.",
+    "prompt_ru": "Логотип [image_1], выполненный из [materials]. Сохранить: силуэт и геометрию 1:1. Изменить: только материализацию. Top-down, белый фон, единый свет, мягкие тени под объектами, фотореализм. Формат: [aspect_ratio], output 4K, sRGB. Без лишних объектов/текста.",
+    "prompt_en": "Logo [image_1] constructed from [materials]. Keep: silhouette and geometry 1:1. Change: materialization only. Top-down, white background, single coherent light, soft contact shadows, photoreal. Format: [aspect_ratio], output 4K, sRGB. No extra clutter/text.\nNEG (optional): deformed logo shape, extra text, watermark"
   },
-  {
-    "id": "logo_creative",
-    "title": "16. Логотип (Creative)",
-    "description": "Разработка уникального логотипа.",
-    "prompt_ru": "Векторный дизайн логотипа для [industry_brand]. Образ: [imagery]. Настроение: [emotions]. Цвета: [colors]. Стиль: [style]. Белый фон. Чистые линии, минимализм.",
-    "prompt_en": "Vector logo design for [industry_brand]. Core Imagery: [imagery]. Vibe: [emotions]. Colors: [colors]. Style: [style] (e.g. Minimalist, Mascot, Geometric). Solid white background. Clean lines, professional branding."
+  "ui_design": {
+    "title": "16. UI/UX Дизайн",
+    "description": "Экран приложения/сайта.",
+    "prompt_ru": "UI дизайн [screen_type] для [industry]. Платформа: [platform]. Стиль: [style]. Сетка: 8pt grid + safe areas. Контент: реальный текст (не Lorem), без орфографических ошибок. Иконки pixel-perfect, единый стиль. Без артефактов шрифта/битых символов. Формат: [aspect_ratio], output 4K, sRGB. Без водяных знаков.",
+    "prompt_en": "UI design [screen_type] for [industry]. Platform: [platform]. Style: [style]. 8pt grid + safe areas. Real copy (no Lorem), no spelling errors. Pixel-perfect icons, consistent system. No font artifacts/broken glyphs. Format: [aspect_ratio], output 4K, sRGB. No watermarks.\nNEG (optional): lorem ipsum, broken text, random watermark"
   },
-  {
-    "id": "logo_stylization",
-    "title": "17. Стилизация логотипа (3D)",
-    "description": "Логотип из предметов.",
-    "prompt_ru": "Редизайн логотипа [image_1]. Выложить форму знака, используя реалистичные [objects]. Вид сверху, мягкие тени, белый фон. Фотореализм.",
-    "prompt_en": "Logo redesign of [image_1]. Construct the shape using photorealistic [objects]. Top-down view, soft shadows, white background. Photorealistic rendering."
+  "text_design": {
+    "title": "17. Типографический постер",
+    "description": "Постер с идеально воспроизведённым текстом.",
+    "prompt_ru": "Постер с текстом строго “[text]” (без изменения символов/регистра/кавычек, без лишних знаков). Шрифт: [font_style]. Аккуратный кернинг/трекинг, идеальная читаемость. Векторная четкость, поля 5–8%. Цвета: [colors]. Формат: [aspect_ratio], output 4K, sRGB. Без водяных знаков.",
+    "prompt_en": "Poster with text exactly “[text]” (no symbol/case/quote changes, no extra characters). Font: [font_style]. Clean kerning/tracking, high readability. Vector sharpness, 5–8% safe margins. Colors: [colors]. Format: [aspect_ratio], output 4K, sRGB. No watermarks.\nNEG (optional): misspelling, broken glyphs, watermark"
   },
-  {
-    "id": "text_design",
-    "title": "18. Текстовый дизайн (Typography)",
-    "description": "Баннеры с красивым шрифтом.",
-    "prompt_ru": "Типографический постер для [brand]. Текст: «[text]». Шрифт: [font_style]. Графический стиль: [design_style]. Цвета: [colors]. Векторная четкость, идеальная читаемость текста.",
-    "prompt_en": "Typography poster design for [brand]. Feature the text \"[text]\" clearly and legibly. Font choice: [font_style]. Graphic style: [design_style]. Colors: [colors]. Vector sharpness, high readability, professional kerning and composition."
+  "image_restyling": {
+    "title": "18. Стилизация (Art Style)",
+    "description": "Стилизация фото в выбранную технику.",
+    "prompt_ru": "Стилизовать [image_1]. Стиль: [style]. Уровень: [level]. Медиум: [medium]. Сохранить: композицию и силуэты. Ограничение: не добавлять новые объекты, не менять анатомию/пропорции. Формат: [aspect_ratio], output 4K, sRGB. Без водяных знаков.",
+    "prompt_en": "Restyle [image_1]. Style: [style]. Level: [level]. Medium: [medium]. Keep: composition and silhouettes. Constraint: do not add new objects; do not alter anatomy/proportions. Format: [aspect_ratio], output 4K, sRGB. No watermarks.\nNEG (optional): extra objects, anatomy warp, watermark"
   },
-  {
-    "id": "product_card",
-    "title": "19. Карточка товара (Marketplace)",
-    "description": "Продающая инфографика.",
-    "prompt_ru": "Дизайн карточки товара для маркетплейса на основе [image_1]. Добавить инфографику с преимуществами: [features_list]. Стиль: Коммерческий, яркий, [design_style]. Пропорции [aspect_ratio]. Крупный читаемый текст.",
-    "prompt_en": "E-commerce product card design based on [image_1]. Incorporate infographics highlighting these features: [features_list]. Style: Commercial, vibrant, [design_style]. Aspect ratio [aspect_ratio]. Focus on the product with large, readable typography."
+  "sketch_to_photo": {
+    "title": "19. Скетч в фото (Sketch to Photo)",
+    "description": "Перевод наброска в реализм, строго по линиям.",
+    "prompt_ru": "Рендер скетча [image_1] в фотореализм. Критично: строго следовать линиям, не менять пропорции/перспективу, не добавлять элементы, которых нет в скетче. Материалы: [materials]. Свет: [lighting] (cinematic). Формат: [aspect_ratio], output 4K, sRGB. Без лишнего текста.",
+    "prompt_en": "Render sketch [image_1] into photorealism. Critical: adhere to lines; do not change proportions/perspective; do not add elements not in the sketch. Materials: [materials]. Lighting: [lighting] (cinematic). Format: [aspect_ratio], output 4K, sRGB. No extra text.\nNEG (optional): design changes, extra props, watermark"
   },
-  {
-    "id": "youtube_thumbnail",
-    "title": "20. Обложка YouTube (Viral)",
-    "description": "Кликбейтное превью с эмоциями.",
-    "prompt_ru": "YouTube превью: заменить лицо на [image_1] лицом [face_description_or_image_2]. Эмоция: Шокированное/Радостное. Заменить заголовок на текст «[text]». Яркие, насыщенные цвета, высокий контраст, вирусный стиль.",
-    "prompt_en": "YouTube thumbnail editing: swap the face in [image_1] with [face_description_or_image_2]. Expression: Shocked/Excited. Change the title text to read \"[text]\". Use vibrant colors, high contrast, and a viral content aesthetic."
+  "character_sheet": {
+    "title": "20. Лист персонажа (Character Sheet)",
+    "description": "3 вида для 3D-референса.",
+    "prompt_ru": "Персонаж: [description]. Виды: Front / Side / Back. Фон: нейтральный белый. Проекция: ортографическая (без перспективы). Единый масштаб, стопы на одной линии. Свет: равномерный плоский. Подписи ракурсов: [labels_visibility]. Формат: [aspect_ratio], output 4K, sRGB.",
+    "prompt_en": "Character: [description]. Views: Front / Side / Back. Neutral white background. Orthographic projection (no perspective). Consistent scale, feet on same baseline. Flat even lighting. View labels: [labels_visibility]. Format: [aspect_ratio], output 4K, sRGB.\nNEG (optional): perspective, dramatic lighting, watermark"
   },
-  {
-    "id": "image_restyling",
-    "title": "21. Стилизация (Art Filter)",
-    "description": "Превращает фото в картину.",
-    "prompt_ru": "Перерисовать [image_1] в художественном стиле [style]. Сохранить композицию, но полностью изменить технику исполнения. Имитация материалов: [materials] (напр. Масло, Акварель).",
-    "prompt_en": "Restyle [image_1] into the artistic style of: [style]. Preserve the original composition and silhouettes but completely change the rendering technique. Medium simulation: [materials] (e.g. Oil paint, Watercolor, Pencil sketch)."
+  "sticker_pack": {
+    "title": "21. Набор стикеров",
+    "description": "Стикеры с die-cut обводкой.",
+    "prompt_ru": "Sticker pack [character]. Количество: [count]. Эмоции/позы: [list]. Каждый стикер изолирован, равные отступы, единый масштаб персонажа. Белая обводка die-cut одинаковой толщины. Фон: темный контрастный. Стиль: векторный, плоские цвета. Формат: [aspect_ratio], output 4K, sRGB. Без лишнего текста.",
+    "prompt_en": "Sticker pack [character]. Count: [count]. Emotions/poses: [list]. Each sticker isolated, consistent spacing and character scale. Thick white die-cut border with consistent width. Dark contrasting background. Vector, flat colors. Format: [aspect_ratio], output 4K, sRGB. No extra text.\nNEG (optional): inconsistent border, messy spacing, watermark"
   },
-  {
-    "id": "sketch_to_photo",
-    "title": "22. Скетч в Фото (Render)",
-    "description": "Визуализация наброска в реализм.",
-    "prompt_ru": "Превратить скетч [image_1] в фотореалистичное изображение. Стиль: [style]. Материалы: [materials]. Кинематографичное освещение, 8k render. Строго следовать линиям скетча.",
-    "prompt_en": "Render the sketch [image_1] into a photorealistic image. Style: [style]. Object materials: [materials]. Cinematic lighting, 8k render. Strictly adhere to the sketch outlines and forms."
+  "comic_page": {
+    "title": "22. Страница комикса",
+    "description": "Страница с панелями и читабельным текстом.",
+    "prompt_ru": "Страница комикса: [scene]. 4–6 панелей, gutters одинаковой толщины. Стиль: [style]. Текст (если есть): [language], читабельно, без бессмыслицы. Драматичные тени по стилю. Формат: [aspect_ratio], output 4K, sRGB.",
+    "prompt_en": "Comic page: [scene]. 4–6 panels with uniform gutters. Style: [style]. Text (if any): [language], legible, no gibberish. Dramatic shadows per style. Format: [aspect_ratio], output 4K, sRGB.\nNEG (optional): unreadable text, random watermark"
   },
-  {
-    "id": "visual_infographic",
-    "title": "23. Инфографика (Expert)",
-    "description": "Экспертный контент с тезисами.",
-    "prompt_ru": "Профессиональная инфографика на основе [image_1]. Заголовок: «[text]». Пункты списка: [features_list]. Дизайн: [design_style], цвета [colors]. Текст не должен перекрывать важные детали. Деловая эстетика.",
-    "prompt_en": "Professional infographic using [image_1] as the base. Title: \"[text]\". Bullet points content: [features_list]. Design style: [design_style], color palette [colors]. Ensure text does not overlap key visual elements. Business aesthetic."
+  "seamless_pattern": {
+    "title": "23. Бесшовный паттерн",
+    "description": "Tileable узор для печати.",
+    "prompt_ru": "Бесшовный паттерн. Тема: [theme]. Стиль: [style]. Цвета: [colors]. Критично: края тайла стыкуются идеально со всех сторон (tileable), без швов/разрывов. Плоский 2D, без перспективы/виньетки. Preview mode: [show_preview].\n— Если yes: показать превью 2×2 (четыре повтора) в одном кадре.\n— Если no: один тайл.\nФормат: [aspect_ratio], output 4K, sRGB. Без текста.",
+    "prompt_en": "Seamless pattern. Theme: [theme]. Style: [style]. Colors: [colors]. Critical: edges match perfectly on all sides (tileable), no seams. Flat 2D, no perspective/vignette. Preview mode: [show_preview].\n— yes: show a 2×2 tiled preview in one frame.\n— no: single tile.\nFormat: [aspect_ratio], output 4K, sRGB. No text.\nNEG (optional): seams, vignette, perspective, watermark"
   },
-  {
-    "id": "element_combine",
-    "title": "24. Комбинирование (Collage)",
-    "description": "Соединяет элементы двух фото.",
-    "prompt_ru": "Бесшовный коллаж: поместить [element_from_image_2] поверх [element_from_image_1]. Учесть перспективу и физику наложения. Объекты должны выглядеть как единое целое.",
-    "prompt_en": "Seamless collage: Place [element_from_image_2] onto [element_from_image_1]. Respect perspective and layering physics. The objects must blend coherently into a single scene."
+  "interior_design": {
+    "title": "24. Интерьерный дизайн",
+    "description": "Фотореалистичный интерьер.",
+    "prompt_ru": "Интерьер [room_type]. Стиль: [style]. Материалы: [materials]. Камера: 24–28mm, вертикали ровные (2-point perspective, no keystone). Свет: естественный дневной. Чистые материалы/текстуры, реалистичные тени. Формат: [aspect_ratio], output 4K, sRGB. Без текста/водяных знаков.",
+    "prompt_en": "Interior [room_type]. Style: [style]. Materials: [materials]. Camera: 24–28mm, straight verticals (2-point perspective, no keystone). Natural daylight. Clean materials/textures, realistic shadows. Format: [aspect_ratio], output 4K, sRGB. No text/watermarks.\nNEG (optional): bent walls, keystone distortion, watermark"
   },
-  {
-    "id": "comic_page",
-    "title": "25. Страница комикса",
-    "description": "Создание сюжетной страницы.",
-    "prompt_ru": "Страница комикса. Стиль: [style]. Сцена: [situation] с персонажем [character_description]. Динамичные кадры, облачка с текстом, драматичные тени.",
-    "prompt_en": "Comic book page. Style: [style]. Scene: [situation] featuring [character_description]. Dynamic panels, speech bubbles, dramatic shadows."
+  "architecture_exterior": {
+    "title": "25. Архитектурный экстерьер",
+    "description": "Фотореалистичный экстерьер здания.",
+    "prompt_ru": "Экстерьер [building_type]. Окружение: [environment]. Время/погода: [time]. Камера: shift lens, вертикали ровные; объектив [lens]. Ракурс: eye-level или drone. Чистые материалы, корректные тени. Формат: [aspect_ratio], output 4K (8K if available), sRGB. Без текста/водяных знаков.",
+    "prompt_en": "Exterior [building_type]. Environment: [environment]. Time/Weather: [time]. Camera: shift lens, straight verticals; lens look [lens]. Eye-level or drone. Clean materials, accurate shadows. Format: [aspect_ratio], output 4K (8K if available), sRGB. No text/watermarks.\nNEG (optional): warped perspective, tilted building, watermark"
   },
-  {
-    "id": "scene_composite",
-    "title": "26. Общая сцена (Composite)",
-    "description": "Сборка сложной сцены.",
-    "prompt_ru": "Создать единую сцену, объединив [element_1] и [element_2]. Описание сцены: [scene_description]. Выровнять баланс белого, зернистость и фокусное расстояние.",
-    "prompt_en": "Create a unified scene merging [element_1] and [element_2]. Scene description: [scene_description]. Match white balance, film grain, and focal length for consistency."
+  "isometric_room": {
+    "title": "26. Изометрическая комната",
+    "description": "Изометрический “кукольный домик” без перспективы.",
+    "prompt_ru": "Изометрический срез [room]. Проекция: true isometric 30°/30° (без перспективного схождения). Стиль: [style]. Разрезы чистые, без рваных краев. Однотонный фон: [background_color]. Мягкий глобальный свет. Формат: [aspect_ratio], output 4K, sRGB. Без текста.",
+    "prompt_en": "Isometric cutaway [room]. Projection: true isometric 30°/30° (no convergence). Style: [style]. Clean cutaway edges, no jagged lines. Solid background: [background_color]. Soft global illumination. Format: [aspect_ratio], output 4K, sRGB. No text.\nNEG (optional): perspective convergence, jagged edges, watermark"
   },
-  {
-    "id": "storyboard_gen",
-    "title": "27. Раскадровка (Storyboard)",
-    "description": "Создает последовательность кадров для видео.",
-    "prompt_ru": "Кинематографическая раскадровка (Storyboard) из 4 кадров для сцены: [scene_description]. Стиль: [style] (например, черно-белый скетч, цветной концепт). Кадры должны показывать развитие действия. Подписи под кадрами.",
-    "prompt_en": "Cinematic storyboard consisting of 4 panels depicting the scene: [scene_description]. Style: [style] (e.g., black and white sketch, digital painting). The panels must show the progression of action. Include short captions."
+  "youtube_thumbnail": {
+    "title": "27. Обложка YouTube (Viral)",
+    "description": "Вирусное превью 16:9.",
+    "prompt_ru": "YouTube превью. Композиция: 16:9. Тип: [type]. Эмоция лица: [expression]. Лицо 30–40% кадра. Текст строго “[text]” (3–5 слов), крупный, с обводкой/тенью для читаемости. Высокий контраст, насыщенные цвета, без мелкого мусорного текста. Формат: 16:9, output 4K, sRGB.",
+    "prompt_en": "YouTube thumbnail. Composition: 16:9. Type: [type]. Face expression: [expression]. Face 30–40% of frame. Text exactly “[text]” (3–5 words), large with stroke/shadow for readability. High contrast, saturated colors, no tiny clutter text. Format: 16:9, output 4K, sRGB. \nNEG (optional): tiny text, unreadable typography, watermark"
   },
-  {
-    "id": "technical_blueprint",
-    "title": "28. Технический чертеж (Blueprint)",
-    "description": "Схематичное изображение устройства.",
-    "prompt_ru": "Детальный технический чертеж [object]. Стиль: Синька (Blueprint) или патентная иллюстрация. Белые линии на синем фоне. Выноски с текстом, размеры, вид в разрезе. Высокая инженерная точность.",
-    "prompt_en": "Detailed technical blueprint of [object]. Style: Classic Blueprint or Patent Illustration. White lines on a blue grid background. Include text annotations, dimensions, and a cross-section view. High engineering precision."
+  "cinematic_atmosphere": {
+    "title": "28. Кинематографичная атмосфера",
+    "description": "Сцена “как из фильма”.",
+    "prompt_ru": "Сцена из фильма с [subject]. Стиль: [style]. Формат: [aspect_ratio]. Свет: coherent key direction + логичный fill/rim. Объемные лучи, дымка. Эффекты: mild chromatic aberration, film grain, restrained anamorphic flares (без перебора). Cinematic color grading. Формат: [aspect_ratio], output 4K, sRGB. Без текста/водяных знаков.",
+    "prompt_en": "Movie scene featuring [subject]. Style: [style]. Format: [aspect_ratio]. Coherent key direction + logical fill/rim. Volumetric rays, haze. Effects: mild chromatic aberration, film grain, restrained anamorphic flares (not overdone). Cinematic color grading. Format: [aspect_ratio], output 4K, sRGB. No text/watermarks.\nNEG (optional): heavy aberration, overdone flares, watermark"
   },
-  {
-    "id": "neon_cyberpunk",
-    "title": "29. Неоновый Киберпанк",
-    "description": "Атмосферный ночной город.",
-    "prompt_ru": "Футуристическая сцена в стиле Киберпанк с участием [subject]. Окружение: ночной дождливый город, неоновые вывески (цвета: [colors]). Отражения на мокром асфальте. Кинематографичный свет, дымка, объемный свет.",
-    "prompt_en": "Futuristic Cyberpunk scene featuring [subject]. Environment: Rainy night city, glowing neon signs (colors: [colors]). Reflections on wet asphalt. Cinematic lighting, atmospheric haze, volumetric light rays."
+  "technical_blueprint": {
+    "title": "29. Технический чертеж (Blueprint)",
+    "description": "Инженерная схема с размерами.",
+    "prompt_ru": "Чертеж [object]. Виды: front/side/top + cross-section. Проекция ортогональная. Стиль: blueprint/patent (белые линии на синем с сеткой). Единая толщина линий. Размеры с единицами (mm/cm), выноски с читабельным текстом без ошибок. Без шейдинга/теней. Формат: [aspect_ratio], output 4K, sRGB.",
+    "prompt_en": "Blueprint [object]. Views: front/side/top + cross-section. Orthographic projection. Blueprint/patent style (white lines on blue grid). Consistent line weight. Dimensions with units (mm/cm), readable annotations with correct spelling. No shading/shadows. Format: [aspect_ratio], output 4K, sRGB.\nNEG (optional): shading, sketchy lines, watermark"
+  },
+  "macro_extreme": {
+    "title": "30. Макро-съемка (Macro Extreme)",
+    "description": "Экстремальный крупный план текстур.",
+    "prompt_ru": "Макро [object]. 100mm macro lens look. Фон: [background]. Свет: [lighting]. Видны микро-текстуры пыли/материала, микронеровности, капли (если нужно). DOF: очень малая, сливочное боке. Focus stacking: [focus_stacking]. Формат: [aspect_ratio], output 4K, sRGB. Без текста/водяных знаков.",
+    "prompt_en": "Macro [object]. 100mm macro lens look. Background: [background]. Light: [lighting]. Visible micro-texture, dust, grain, tiny imperfections, droplets if needed. Razor-thin DOF, creamy bokeh. Focus stacking: [focus_stacking]. Format: [aspect_ratio], output 4K, sRGB. No text/watermarks.\nNEG (optional): noisy artifacts, excessive sharpening, watermark"
   }
-]
+}
