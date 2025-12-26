@@ -1,21 +1,33 @@
-import streamlit as st
-import streamlit.components.v1 as components
+import os
 import re
 import datetime
-import os
+
+import streamlit as st
+import streamlit.components.v1 as components
+
 from prompt_manager import PromptManager
 from st_copy_to_clipboard import st_copy_to_clipboard
-from deep_translator import GoogleTranslator
 
-# --- 1. CONFIG ---
+# Перевод (если библиотека/сеть отвалятся — приложение не должно падать)
+try:
+    from deep_translator import GoogleTranslator
+except Exception:
+    GoogleTranslator = None
+
+
+# =========================================================
+# 1) CONFIG
+# =========================================================
 st.set_page_config(
     page_title="Nano Banano Pro",
     page_icon="🍌",
     layout="centered",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
-# --- 2. JS CLEANER (remove annoying titles from select tooltips) ---
+# =========================================================
+# 2) JS CLEANER (remove annoying titles from select tooltips)
+# =========================================================
 components.html(
     """
     <script>
@@ -33,10 +45,9 @@ components.html(
     height=0,
 )
 
-# --- 3. NEGATIVE PROMPT LIBRARY ---
-# NOTE:
-# - NanoBanano Pro usually uses single-line input, so we append NEG with "--no".
-# - For advanced users we still show Positive and Negative separately (WebUI-style).
+# =========================================================
+# 3) NEGATIVE PROMPT LIBRARY
+# =========================================================
 NEG_GROUPS = {
     1: {  # Photorealism & People
         "Mini": {
@@ -124,7 +135,6 @@ NEG_GROUPS = {
     },
 }
 
-# Per-prompt NEG add-ons (to fix mixed groups like Group 6 and special tasks like Logo)
 NEG_ADDONS = {
     "logo_creative": {
         "en": "photorealistic, 3d render, mockup, gradients, textures, shadows, realistic lighting",
@@ -140,33 +150,92 @@ NEG_ADDONS = {
     },
 }
 
+# Полная карта групп — чтобы ни один prompt не «проваливался» в дефолт
 ID_TO_GROUP = {
-    "upscale_restore": 1, "studio_portrait": 1, "background_change": 1, "face_swap": 1, "expression_change": 1, "cloth_swap": 1,
-    "object_removal": 2, "object_addition": 2, "scene_relighting": 2, "scene_composite": 2,
-    "product_card": 3, "mockup_generation": 3, "knolling_photography": 3, "logo_creative": 3, "logo_stylization": 3, "ui_design": 3, "text_design": 3,
-    "image_restyling": 4, "sketch_to_photo": 4, "character_sheet": 4, "sticker_pack": 4, "comic_page": 4, "seamless_pattern": 4,
-    "interior_design": 5, "architecture_exterior": 5, "isometric_room": 5,
-    "youtube_thumbnail": 6, "cinematic_atmosphere": 6, "technical_blueprint": 6, "macro_extreme": 6
+    # Group 1 (people/identity / photoreal people)
+    "upscale_restore": 1,
+    "old_photo_restore": 1,
+    "studio_portrait": 1,
+    "background_change": 1,
+    "face_swap": 1,
+    "expression_change": 1,
+    "pose_change": 1,
+    "camera_angle_change": 1,
+    "cloth_swap": 1,
+    "team_composite": 1,
+
+    # Group 2 (editing/compositing)
+    "object_removal": 2,
+    "object_addition": 2,
+    "semantic_replacement": 2,
+    "scene_relighting": 2,
+    "scene_composite": 2,
+    "total_look_builder": 2,
+
+    # Group 3 (commercial/design)
+    "product_card": 3,
+    "mockup_generation": 3,
+    "environmental_text": 3,
+    "knolling_photography": 3,
+    "logo_creative": 3,
+    "logo_stylization": 3,
+    "ui_design": 3,
+    "text_design": 3,
+
+    # Group 4 (art/illustration)
+    "image_restyling": 4,
+    "sketch_to_photo": 4,
+    "character_sheet": 4,
+    "sticker_pack": 4,
+    "comic_page": 4,
+    "storyboard_sequence": 4,
+    "seamless_pattern": 4,
+    "anatomical_infographic": 4,
+
+    # Group 5 (architecture)
+    "interior_design": 5,
+    "architecture_exterior": 5,
+    "isometric_room": 5,
+
+    # Group 6 (cinema/vfx/technical)
+    "youtube_thumbnail": 6,
+    "cinematic_atmosphere": 6,
+    "technical_blueprint": 6,
+    "exploded_view": 6,
+    "macro_extreme": 6,
 }
 
-# --- 4. HISTORY ---
+# =========================================================
+# 4) HISTORY
+# =========================================================
 if "history" not in st.session_state:
     st.session_state["history"] = []
+if "history_counter" not in st.session_state:
+    st.session_state["history_counter"] = 0
+
 
 def save_to_history(task, prompt_en, prompt_ru):
+    st.session_state["history_counter"] += 1
     timestamp = datetime.datetime.now().strftime("%H:%M")
-    st.session_state["history"].insert(0, {
-        "task": task,
-        "en": prompt_en,
-        "ru": prompt_ru,
-        "time": timestamp,
-        "id": len(st.session_state["history"]) + 1
-    })
+    st.session_state["history"].insert(
+        0,
+        {
+            "task": task,
+            "en": prompt_en,
+            "ru": prompt_ru,
+            "time": timestamp,
+            "id": st.session_state["history_counter"],
+        },
+    )
     if len(st.session_state["history"]) > 50:
         st.session_state["history"].pop()
 
-# --- 5. CSS (VISUAL FIXES) ---
-st.markdown("""
+
+# =========================================================
+# 5) CSS (VISUAL FIXES)
+# =========================================================
+st.markdown(
+    """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
@@ -201,6 +270,9 @@ div[data-baseweb="base-input"] input, div[data-baseweb="textarea"] textarea {
 }
 input::placeholder, textarea::placeholder {
     color: #888888 !important; -webkit-text-fill-color: #888888 !important; opacity: 1 !important; font-weight: 400 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 div[data-baseweb="base-input"]:focus-within, div[data-baseweb="select"] > div:focus-within, div[data-baseweb="textarea"]:focus-within {
     border-color: #FFD700 !important; box-shadow: 0 0 0 1px #FFD700 !important;
@@ -241,121 +313,270 @@ div.stButton > button:hover, div.stFormSubmitButton > button:hover {
     border: none !important; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
-# --- 6. BANNER & INSTRUCTIONS ---
-st.markdown("""
+# =========================================================
+# 6) BANNER & INSTRUCTIONS
+# =========================================================
+st.markdown(
+    """
 <div class="main-banner">
     <h1>🍌 Nano Banano Pro</h1>
     <p>Твой карманный AI-креативщик</p>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 with st.expander(":material/info: Как пользоваться и что значат кнопки?"):
-    st.markdown("""
+    st.markdown(
+        """
 ### :material/bolt: Быстрый старт
 1. **Выберите задачу** в меню слева.
-2. **Заполните поля**.
-3. **Выберите режим негатива**.
+2. **Заполните поля** (примеры — внутри поля; наведите на **?** у поля, чтобы увидеть расширенную подсказку).
+3. **Выберите режим негатива** (по умолчанию — **medium**).
 4. Нажмите **"🍌 Сгенерировать Промпт"**.
 
 ### :material/tune: Режимы негатива
-- **Mini:** минимум запретов (если модель «теряется»).
-- **Default (Mini+):** рекомендованный баланс.
-- **Aggressive (Full):** если лезут артефакты/пластик/швы.
+- **light (Mini):** минимум запретов (если модель «теряется»).
+- **medium (Default):** рекомендованный баланс.
+- **hard (Aggressive):** если лезут артефакты/пластик/швы.
 
 ### :material/content_copy: Копирование
 - **Всё в одном (для NanoBanano / ботов):** Positive + `--no` + Negative
 - **Раздельно (для WebUI):** Positive и Negative отдельными кнопками
-""")
+"""
+    )
 st.write("---")
 
-# --- 7. UI LABELS / EXAMPLES ---
+# =========================================================
+# 7) UX: Labels / Examples
+# =========================================================
 VAR_MAP = {
+    # Common
     "image_1": "Исходное изображение / Ссылка",
     "image_2": "Второе изображение / Референс",
     "aspect_ratio": "Формат (Пропорции)",
-    "background": "Фон / Окружение",
+    "background": "Фон / Стиль",
+    "background_type": "Фон / Стиль (для мокапа)",
+    "environment": "Окружение / Стиль",
     "lighting": "Освещение",
     "style": "Стиль",
     "colors": "Цветовая гамма",
 
-    "person": "Персонаж (Кто?)",
+    # People
+    "person": "Персонаж (кто/что в кадре?)",
     "emotion": "Эмоция",
     "intensity": "Интенсивность эмоции",
+    "camera_angle": "Ракурс камеры",
+    "action_description": "Что делает персонаж (поза/действие)",
+
+    # Cloth / fabric
     "fabric_material": "Материал ткани/одежды",
 
+    # Objects / editing
     "object": "Объект",
     "placement_details": "Где разместить объект?",
-    "lighting_condition": "Условия освещения",
-    "element_1": "Элемент 1 (Основа)",
-    "element_2": "Элемент 2 (Вставка)",
-    "scene_description": "Описание сцены",
+    "lighting_condition": "Новые условия освещения",
+    "object_to_replace": "Что заменить (объект)",
+    "new_object": "На что заменить",
+
+    # Composite / montage
+    "element_1": "Элемент 1 (основа)",
+    "element_2": "Элемент 2 (вставка)",
+    "scene_description": "Описание сцены / что должно получиться",
     "lens_match_mode": "Сведение линз (feel/strict)",
 
+    # Commerce / design
     "product": "Название продукта",
-    "text": "Текст (Точная цитата)",
-    "features_list": "Список фич (через запятую)",
-    "object_type": "Тип объекта (для мокапа)",
-    "background_type": "Тип фона (поверхность)",
-    "print_finish": "Покрытие (Matte/Glossy/Foil)",
+    "text": "Текст (точно как должен быть)",
+    "features_list": "Фичи (через запятую)",
+    "object_type": "На что наносим дизайн (объект мокапа)",
+    "print_finish": "Покрытие/финиш (matte/glossy/foil)",
     "brand": "Бренд",
-    "imagery": "Образ / Символ",
+    "imagery": "Образ / символ",
     "materials": "Материалы",
     "screen_type": "Тип экрана",
-    "industry": "Индустрия / Ниша",
+    "industry": "Индустрия / ниша",
     "platform": "Платформа (iOS/Android/Web)",
     "font_style": "Стиль шрифта",
 
+    # Art style
     "level": "Сила стилизации",
-    "medium": "Медиум",
-    "description": "Описание персонажа",
+    "medium": "Техника (medium)",
+    "description": "Описание персонажа/объекта",
     "labels_visibility": "Подписи ракурсов",
-    "character": "Персонаж для стикеров",
-    "count": "Количество стикеров",
-    "list": "Список эмоций/поз",
-    "scene": "Сцена комикса",
+    "character": "Персонаж (стикеры)",
+    "count": "Количество",
+    "list": "Список эмоций/поз (через запятую)",
+    "scene": "Сцена (что происходит?)",
     "language": "Язык текста (en/ru)",
     "theme": "Тема паттерна",
     "show_preview": "Показать превью 2×2?",
     "room_type": "Тип комнаты",
-    "room": "Комната (для среза)",
+    "room": "Комната (для cutaway)",
     "building_type": "Тип здания",
-    "environment": "Окружение здания",
-    "time": "Время суток / Погода",
+    "time": "Время суток / погода",
     "lens": "Объектив (24mm/35mm...)",
-    "background_color": "Цвет фона (изометрия)",
+    "background_color": "Цвет фона",
     "type": "Тип (Photo/Illustration)",
     "expression": "Выражение лица (превью)",
     "subject": "Главный объект",
     "focus_stacking": "Focus stacking (on/off)",
+
+    # Multi-image builders
+    "model_image": "Фото модели (ссылка/файл)",
+    "clothing_image": "Одежда (ссылка/файл)",
+    "footwear_image": "Обувь (ссылка/файл)",
+    "accessory_image": "Аксессуар (ссылка/файл)",
+    "people_links": "Ссылки на людей (через запятую)",
+    "activity": "Активность / что делают",
+
+    # Environmental Text
+    "text_content": "Текст (точно как должен быть)",
+    "environment_description": "Окружение / Стиль (описание сцены)",
+    "target_object": "На какой объект нанести текст?",
+    "material_type": "Материал поверхности",
+    "application_style": "Способ нанесения",
+
+    # Storyboard
+    "layout": "Сетка / компоновка кадров",
+    "action_sequence": "Последовательность действий",
+    "character_description": "Описание персонажа (для консистентности)",
 }
 
+# Поля, где текст должен быть ВЫВЕДЕН ТОЧНО (без перевода/без смены регистра/символов)
+EXACT_TEXT_VARS = {"text", "text_content"}
+
+# Примеры внутри поля (коротко) + расширенная подсказка по "?"
 EXAMPLES_DB = {
-    "image_1": {"ph": "Ссылка на изображение или имя файла...", "help": "Главное изображение для обработки."},
-    "image_2": {"ph": "Ссылка на референс / донор...", "help": "Лицо/одежда/дизайн/референс."},
-    "aspect_ratio": {"ph": "16:9, 9:16, 1:1, 4:5...", "help": "Пропорции итоговой картинки."},
-    "background": {"ph": "Современный офис, улица Токио ночью...", "help": "Новое окружение."},
-    "lighting": {"ph": "soft studio, window light, neon...", "help": "Свет в кадре."},
-    "style": {"ph": "photoreal, cyberpunk, watercolor...", "help": "Общий стиль."},
-    "colors": {"ph": "black & gold, pastel, neon...", "help": "Цветовая палитра."},
-    "lens_match_mode": {"ph": "feel / strict", "help": "feel = визуально сводим, strict = строго фокусное."},
+    "image_1": {"ph": "https://... или имя файла", "help": "Главное изображение для обработки."},
+    "image_2": {"ph": "https://... или имя файла", "help": "Референс/донор: лицо, одежда, дизайн, пример стиля."},
+
+    "aspect_ratio": {
+        "ph": "9:16",
+        "help": "Пропорции итоговой картинки.\nПримеры: 9:16 (сторис), 16:9 (YouTube), 1:1, 4:5, 3:2."
+    },
+
+    "background": {
+        "ph": "офис / стиль Да Винчи",
+        "help": "Фон ИЛИ художественный стиль.\nПримеры:\n• современный офис\n• улица Токио ночью\n• стиль Леонардо да Винчи\n• акварельная стилизация\n• минималистичный студийный фон"
+    },
+    "background_type": {
+        "ph": "нейтральный студийный",
+        "help": "Фон/поверхность в мокапе.\nПримеры:\n• белый студийный\n• бетонная стена\n• деревянный стол\n• стиль: luxury black&gold"
+    },
+    "environment": {
+        "ph": "коворкинг / минимализм",
+        "help": "Окружение или общий стиль сцены.\nПримеры:\n• коворкинг\n• парк осенью\n• минимализм\n• ретро 80s"
+    },
+
+    "lighting": {"ph": "window light", "help": "Какой свет должен быть в кадре.\nПримеры: soft studio, window light, neon, golden hour."},
+    "style": {"ph": "photoreal", "help": "Общий стиль.\nПримеры: photoreal, cinematic, watercolor, ink comic."},
+    "colors": {"ph": "black & gold", "help": "Цветовая палитра.\nПримеры: black&gold, pastel, neon, muted."},
+
+    "camera_angle": {"ph": "top-down 90°", "help": "Ракурс камеры.\nПримеры: top-down 90° overhead, eye-level, low angle, 3/4 view."},
+    "action_description": {"ph": "держит на руках", "help": "Опиши позу/действие простыми словами."},
+
+    "object": {"ph": "телефон", "help": "Что удалить/добавить/изобразить (зависит от задачи). Пиши конкретно."},
+    "placement_details": {"ph": "на столе слева", "help": "Где именно должен появиться объект. Чем точнее — тем лучше."},
+    "object_to_replace": {"ph": "старая лампа", "help": "Какой объект заменить. Лучше один объект за раз."},
+    "new_object": {"ph": "современный торшер", "help": "На что заменить. Пиши конкретно."},
+
+    "lens_match_mode": {"ph": "feel", "help": "feel = визуально сводим; strict = строго то же фокусное."},
+
+    "product": {"ph": "iPhone 15 Pro Case", "help": "Название товара/продукта."},
+    "text": {
+        "ph": "SALE -50%",
+        "help": "Текст должен быть ровно таким же.\nКРИТИЧНО: не переводить, не менять регистр/символы."
+    },
+    "features_list": {"ph": "waterproof, lightweight", "help": "Ключевые фичи через запятую."},
+
+    "medium": {
+        "ph": "oil paint",
+        "help": "Техника исполнения (материал/medium).\nПримеры: oil paint, watercolor, pencil sketch, ink, charcoal, pastel."
+    },
+
+    "text_content": {
+        "ph": "Привет, мир!",
+        "help": "Текст должен быть ровно таким же.\nКРИТИЧНО: не переводить, не менять регистр/символы."
+    },
+    "language": {
+        "ph": "ru",
+        "help": "Язык текста/подписей, который должен получиться на изображении.\nВарианты: ru или en."
+    },
+    "environment_description": {
+        "ph": "пляж на закате",
+        "help": "Опиши сцену/стиль, где будет нанесен текст.\nПримеры: пляж на закате, каменная стена, ткань крупным планом, стиль: киберпанк."
+    },
+    "target_object": {"ph": "песок", "help": "На какой объект наносим текст.\nПримеры: песок, камень, куртка, футболка, бетон."},
+    "material_type": {"ph": "песок", "help": "Материал поверхности.\nПримеры: sand, stone, denim, cotton, leather, metal."},
+    "application_style": {"ph": "надпись на песке", "help": "Как именно нанесён текст.\nПримеры: embroidery, engraving, paint, chalk, writing in sand."},
+
+    "layout": {
+        "ph": "2x3 grid",
+        "help": "Компоновка кадров.\nПримеры:\n• 2x3 grid\n• 3x2 grid\n• 3 horizontal panels\n• 2x2 grid"
+    },
+    "action_sequence": {
+        "ph": "1) enters 2) looks 3) runs",
+        "help": "Опиши, что происходит по шагам.\nПример: 1) enters room 2) looks around 3) opens door 4) shocked 5) runs away 6) wide shot."
+    },
+    "character_description": {
+        "ph": "girl, red hoodie",
+        "help": "Коротко и конкретно: ключевые приметы для повторяемости.\nПример: young woman, short black hair, red hoodie, blue jeans, white sneakers."
+    },
 }
 
-# Enumerated widgets (reduce user mistakes)
+# Выпадающие списки (селекты) для уменьшения ошибок
 ENUM_OPTIONS = {
+    "aspect_ratio": ["9:16", "16:9", "1:1", "4:5", "3:2", "2:3"],
     "intensity": ["low", "medium", "high"],
     "level": ["light", "medium", "strong"],
     "labels_visibility": ["on", "off"],
     "show_preview": ["yes", "no"],
     "focus_stacking": ["on", "off"],
     "lens_match_mode": ["feel", "strict"],
-    "language": ["en", "ru"],
-    "platform": ["iOS", "Android", "Web"],
+    "language": ["ru", "en"],
+    "platform": ["Web", "iOS", "Android"],
     "type": ["Photo", "Illustration"],
+    "layout": ["2x3 grid", "3x2 grid", "3 horizontal panels", "2x2 grid"],
 }
 
-# --- 8. ENGINE ---
+DEFAULT_ENUM_VALUE = {
+    "aspect_ratio": "9:16",
+    "intensity": "medium",
+    "level": "medium",
+    "language": "ru",
+    "labels_visibility": "off",
+    "show_preview": "no",
+    "focus_stacking": "off",
+    "lens_match_mode": "feel",
+    "platform": "Web",
+    "type": "Photo",
+    "layout": "2x3 grid",
+}
+
+def enum_default_index(var: str) -> int:
+    opts = ENUM_OPTIONS.get(var, [])
+    desired = DEFAULT_ENUM_VALUE.get(var)
+    if desired in opts:
+        return opts.index(desired)
+    return 0
+
+def get_placeholder(var: str) -> str:
+    return EXAMPLES_DB.get(var, {}).get("ph", "Пример...")
+
+def get_help(var: str) -> str:
+    return EXAMPLES_DB.get(var, {}).get(
+        "help",
+        "Подсказка: вводи коротко и конкретно. Можно на русском — мы переведём в EN, если нужно."
+    )
+
+# =========================================================
+# 8) ENGINE
+# =========================================================
 @st.cache_resource
 def load_engine():
     if not os.path.exists("prompts.json"):
@@ -367,23 +588,43 @@ if not manager:
     st.error("❌ Файл `prompts.json` не найден. Положите его рядом с app.py")
     st.stop()
 
-# --- 9. SIDEBAR ---
+# =========================================================
+# 9) SIDEBAR
+# =========================================================
 with st.sidebar:
     st.button("🍌 PRO MENU", key="promenu_btn", use_container_width=True)
     tab_menu, tab_history = st.tabs(["Меню", "История"])
 
 all_prompts = manager.prompts
+
+# стабильный список
 options = {data["title"]: pid for pid, data in all_prompts.items()}
+sorted_titles = sorted(options.keys(), key=lambda x: x)
 
 with tab_menu:
     st.write(" ")
-    selected_title = st.selectbox("Выберите задачу:", list(options.keys()))
+    selected_title = st.selectbox("Выберите задачу:", sorted_titles)
     selected_id = options[selected_title]
     current_prompt_data = all_prompts[selected_id]
-    with st.container(border=True):
-        st.info(current_prompt_data["description"])
 
-# --- 10. MAIN FORM ---
+    image_path = None
+    if os.path.exists(f"assets/{selected_id}.jpg"):
+        image_path = f"assets/{selected_id}.jpg"
+    elif os.path.exists(f"assets/{selected_id}.png"):
+        image_path = f"assets/{selected_id}.png"
+
+    with st.container(border=True):
+        if image_path:
+            st.image(image_path, use_container_width=True)
+
+        st.info(current_prompt_data.get("description", "Описание пока не задано."))
+
+        if not image_path:
+            st.caption("ℹ️ Превью для этого стиля пока не загружено.")
+
+# =========================================================
+# 10) MAIN FORM
+# =========================================================
 st.subheader(f"{selected_title}")
 
 template_en = current_prompt_data["prompt_en"]
@@ -397,14 +638,33 @@ user_inputs = {}
 def has_cyrillic(s: str) -> bool:
     return bool(re.search(r"[А-Яа-яЁё]", s))
 
-def safe_translate_to_en(text: str) -> str:
-    # translate only if looks non-EN (mostly Cyrillic)
-    if not text or not text.strip():
+def safe_translate_to_en(text: str, var_name: str) -> str:
+    """
+    Переводим на EN только то, что похоже на обычное описание.
+    ВАЖНО: поля с точным текстом (text/text_content) НЕ переводим.
+    """
+    if text is None:
+        return ""
+    text = str(text)
+
+    if not text.strip():
         return text
+
+    # ссылки не переводим
     if text.strip().startswith(("http://", "https://", "www.")):
         return text
+
+    # точный текст — никогда не переводим
+    if var_name in EXACT_TEXT_VARS:
+        return text
+
+    # если нет кириллицы — вероятно уже EN
     if not has_cyrillic(text):
         return text
+
+    if GoogleTranslator is None:
+        return text
+
     try:
         translator = GoogleTranslator(source="auto", target="en")
         return translator.translate(text)
@@ -412,11 +672,10 @@ def safe_translate_to_en(text: str) -> str:
         return text  # fail-safe
 
 def normalize_special_vars(d: dict) -> dict:
-    # Expand "control" vars into model-friendly instructions
     out = dict(d)
 
     if "lens_match_mode" in out:
-        mode = out["lens_match_mode"].strip().lower()
+        mode = str(out["lens_match_mode"]).strip().lower()
         out["lens_match_mode"] = (
             "match lens look (focal-length feel) so it reads as one photo"
             if mode.startswith("f")
@@ -424,85 +683,85 @@ def normalize_special_vars(d: dict) -> dict:
         )
 
     if "show_preview" in out:
-        val = out["show_preview"].strip().lower()
-        out["show_preview"] = (
-            "show a 2×2 tiled preview in one frame"
-            if val.startswith("y")
-            else "single tile only"
-        )
+        val = str(out["show_preview"]).strip().lower()
+        out["show_preview"] = "show a 2×2 tiled preview in one frame" if val.startswith("y") else "single tile only"
 
     if "labels_visibility" in out:
-        val = out["labels_visibility"].strip().lower()
-        out["labels_visibility"] = (
-            "add small view labels (Front/Side/Back)"
-            if val == "on"
-            else "no labels"
-        )
+        val = str(out["labels_visibility"]).strip().lower()
+        out["labels_visibility"] = "add small view labels (Front/Side/Back)" if val == "on" else "no labels"
 
     if "focus_stacking" in out:
-        val = out["focus_stacking"].strip().lower()
-        out["focus_stacking"] = (
-            "on (more of the subject in focus)"
-            if val == "on"
-            else "off (razor-thin DOF)"
-        )
+        val = str(out["focus_stacking"]).strip().lower()
+        out["focus_stacking"] = "on (more of the subject in focus)" if val == "on" else "off (razor-thin DOF)"
 
     if "intensity" in out:
-        out["intensity"] = out["intensity"].strip().lower()
+        out["intensity"] = str(out["intensity"]).strip().lower()
 
     if "level" in out:
-        out["level"] = out["level"].strip().lower()
+        out["level"] = str(out["level"]).strip().lower()
 
     return out
+
+def should_add_cyrillic_lock(inputs: dict) -> bool:
+    # Если в точном тексте есть кириллица — усиливаем EN промпт
+    for k in EXACT_TEXT_VARS:
+        if k in inputs and has_cyrillic(str(inputs.get(k, ""))):
+            return True
+    # Если пользователь явно выбрал ru для языка текста — тоже усиливаем
+    if str(inputs.get("language", "")).strip().lower() == "ru":
+        return True
+    return False
+
+CYRILLIC_LOCK_EN = "CRITICAL: if any on-image text is Cyrillic, render it exactly as provided; do NOT translate; keep all characters and case unchanged."
 
 if not required_vars:
     st.success("✅ Для этого промпта параметры не требуются. Просто нажмите кнопку.")
     with st.form("prompt_form_empty"):
-        neg_mode = st.radio(
+        neg_mode_ui = st.selectbox(
             "Режим негатива (Negative Prompt):",
-            ["Mini (Легкий)", "Default (Mini+)", "Aggressive (Full)"],
-            index=1,
-            horizontal=True
+            ["light (Mini)", "medium (Default)", "hard (Aggressive)"],
+            index=1
         )
         submitted = st.form_submit_button("🍌 Сгенерировать Промпт", use_container_width=True)
 else:
     with st.form("prompt_form"):
         cols = st.columns(2)
+
         for i, var in enumerate(required_vars):
             col = cols[i % 2]
-            label = VAR_MAP.get(var, f"Введите {var}")
-            example = EXAMPLES_DB.get(var, {})
-            ph = example.get("ph", "Пример...")
-            help_text = example.get("help", "")
-
+            label = VAR_MAP.get(var, f"Поле: {var}")
+            ph = get_placeholder(var)
+            help_text = get_help(var)
             widget_key = f"{selected_id}__{var}"
 
             if var in ENUM_OPTIONS:
                 user_inputs[var] = col.selectbox(
                     label,
                     options=ENUM_OPTIONS[var],
+                    index=enum_default_index(var),
                     key=widget_key,
-                    help=help_text
+                    help=help_text,
                 )
             else:
                 user_inputs[var] = col.text_input(
                     label,
                     key=widget_key,
                     placeholder=ph,
-                    help=help_text
+                    help=help_text,
                 )
 
         st.write("---")
-        neg_mode = st.radio(
+        neg_mode_ui = st.selectbox(
             "Режим негатива (Negative Prompt):",
-            ["Mini (Легкий)", "Default (Mini+)", "Aggressive (Full)"],
-            index=1,
-            horizontal=True
+            ["light (Mini)", "medium (Default)", "hard (Aggressive)"],
+            index=1
         )
         st.write(" ")
         submitted = st.form_submit_button("🍌 Сгенерировать Промпт", use_container_width=True)
 
-# --- 11. GENERATION ---
+# =========================================================
+# 11) GENERATION
+# =========================================================
 if "submitted" in locals() and submitted:
     missing = [VAR_MAP.get(k, k) for k, v in user_inputs.items() if not str(v).strip()]
     if missing:
@@ -510,45 +769,48 @@ if "submitted" in locals() and submitted:
     else:
         try:
             with st.spinner("⏳ Собираем промпт..."):
-
-                # RU: use raw inputs (as user typed)
+                # RU: raw inputs
                 inputs_ru = normalize_special_vars(user_inputs)
 
-                # EN: translate only if needed (Cyrillic -> EN), keep URLs
+                # EN: translate only if needed (but keep exact text fields intact)
                 inputs_en = {}
                 for k, v in user_inputs.items():
-                    v = str(v)
-                    inputs_en[k] = safe_translate_to_en(v)
+                    inputs_en[k] = safe_translate_to_en(str(v), k)
                 inputs_en = normalize_special_vars(inputs_en)
 
-                # Generate
-                res_en = manager.generate(selected_id, "en", **inputs_en).strip()
-                res_ru = manager.generate(selected_id, "ru", **inputs_ru).strip()
+                # Generate (ВАЖНО: template_lang вместо language)
+                res_en = manager.generate(selected_id, template_lang="en", **inputs_en).strip()
+                res_ru = manager.generate(selected_id, template_lang="ru", **inputs_ru).strip()
 
-                # NEG mode
+                # Усиление для кириллицы в тексте — во всех промптах с точным текстом
+                if should_add_cyrillic_lock(user_inputs):
+                    res_en = f"{res_en}\n{CYRILLIC_LOCK_EN}"
+
+                # NEG preset
                 group_id = ID_TO_GROUP.get(selected_id, 1)
-                mode_key = "Plus"
-                if "Mini" in neg_mode:
+
+                if neg_mode_ui.startswith("light"):
                     mode_key = "Mini"
-                elif "Aggressive" in neg_mode:
+                elif neg_mode_ui.startswith("hard"):
                     mode_key = "Full"
+                else:
+                    mode_key = "Plus"  # medium
 
                 neg_text_en = NEG_GROUPS[group_id][mode_key]["en"]
                 neg_text_ru = NEG_GROUPS[group_id][mode_key]["ru"]
 
-                # Add per-prompt NEG add-ons if needed
+                # Add per-prompt add-ons
                 addon = NEG_ADDONS.get(selected_id)
                 if addon:
                     neg_text_en = f"{neg_text_en}, {addon['en']}"
                     neg_text_ru = f"{neg_text_ru}, {addon['ru']}"
 
-                # For NanoBanano/bots: "--no"
                 full_bot_text = f"{res_en} --no {neg_text_en}"
 
                 save_to_history(
                     selected_title,
                     full_bot_text,
-                    f"{res_ru} | NEG: {neg_text_ru}"
+                    f"{res_ru} | NEG: {neg_text_ru}",
                 )
 
             st.success(":material/check_circle: **Готово!**")
@@ -582,7 +844,9 @@ if "submitted" in locals() and submitted:
         except Exception as e:
             st.error(f"❌ Ошибка: {e}")
 
-# --- 12. HISTORY OUTPUT ---
+# =========================================================
+# 12) HISTORY OUTPUT
+# =========================================================
 with tab_history:
     st.write(" ")
     if st.button("Очистить историю"):
