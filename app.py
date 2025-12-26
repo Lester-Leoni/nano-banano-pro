@@ -270,9 +270,6 @@ div[data-baseweb="base-input"] input, div[data-baseweb="textarea"] textarea {
 }
 input::placeholder, textarea::placeholder {
     color: #888888 !important; -webkit-text-fill-color: #888888 !important; opacity: 1 !important; font-weight: 400 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
 }
 div[data-baseweb="base-input"]:focus-within, div[data-baseweb="select"] > div:focus-within, div[data-baseweb="textarea"]:focus-within {
     border-color: #FFD700 !important; box-shadow: 0 0 0 1px #FFD700 !important;
@@ -712,7 +709,7 @@ def should_add_cyrillic_lock(inputs: dict) -> bool:
         return True
     return False
 
-CYRILLIC_LOCK_EN = "CRITICAL: if any on-image text is Cyrillic, render it exactly as provided; do NOT translate; keep all characters and case unchanged."
+CYRILLIC_LOCK_EN = "CRITICAL: if any on-image text is Cyrillic, render it EXACTLY as provided; do NOT translate; keep all characters and case unchanged."
 
 if not required_vars:
     st.success("✅ Для этого промпта параметры не требуются. Просто нажмите кнопку.")
