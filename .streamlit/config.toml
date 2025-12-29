@@ -1,0 +1,27 @@
+[server]
+headless = true
+
+# Security: keep XSRF protection enabled, and do not allow cross-origin usage by default.
+# (Streamlit warns/overrides when enableCORS=false together with enableXsrfProtection=true.)
+enableXsrfProtection = true
+enableCORS = true
+
+# Hard cap uploads early (MB). UI has its own per-file limit too.
+maxUploadSize = 8
+maxMessageSize = 10
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+# Streamlit's default primary color is red (#FF4B4B), which affects widgets like checkboxes,
+# radios, sliders, etc. Our UI theme uses yellow as the primary accent, so explicitly pin it
+# here to keep widget accents consistent and predictable across Streamlit versions.
+base = "dark"
+primaryColor = "#F7C600"
+
+# Optional alignment with the app's dark UI. These are safe defaults even though we also
+# apply custom CSS in app.py.
+backgroundColor = "#0e0e0e"
+secondaryBackgroundColor = "#161616"
+textColor = "#e6e6e6"

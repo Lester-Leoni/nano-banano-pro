@@ -30,7 +30,6 @@ class PromptManager:
 
         return data
 
-    # ВАЖНО: параметр переименован, чтобы не конфликтовать с переменной [language] в prompts.json
     def generate(self, prompt_id: str, template_lang: str = "en", **user_inputs: Any) -> str:
         if prompt_id not in self.prompts:
             raise ValueError(f"Промпт с ID '{prompt_id}' не найден.")
@@ -44,6 +43,7 @@ class PromptManager:
         template = prompt_data[key]
         required_vars = set(self.VAR_PATTERN.findall(template))
 
+        # Валидация
         missing = [v for v in sorted(required_vars) if v not in user_inputs or str(user_inputs.get(v, "")).strip() == ""]
         if missing:
             raise ValueError(f"Не заполнены обязательные поля: {', '.join(missing)}")

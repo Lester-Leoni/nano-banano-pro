@@ -1,0 +1,15 @@
+[tool.ruff]
+# Keep linting focused on correctness/safety, avoid style churn.
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+# E: pycodestyle errors, F: pyflakes
+select = ["E", "F"]
+ignore = [
+  "E501", # line length (avoid style-only changes)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Streamlit apps are intentionally "script-like" and often have large single files.
+"app.py" = ["E402"]

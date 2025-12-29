@@ -1,0 +1,6 @@
+# Optional dependencies (not required for core functionality)
+#
+# st-copy-to-clipboard is optional because the app has a safe fallback based on
+# the browser Clipboard API.
+
+st-copy-to-clipboard==0.1.6

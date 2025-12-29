@@ -1,3 +1,8 @@
-streamlit
-deep-translator
-st-copy-to-clipboard
+# Pinned runtime dependencies for predictable installs.
+#
+# NOTE: This file keeps runtime deps minimal. Optional dependencies are in
+# requirements-optional.txt.
+
+streamlit==1.52.2
+
+deep-translator==1.11.4
