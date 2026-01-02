@@ -1,7 +1,11 @@
 import json
 import os
 import re
+import logging
 from typing import Dict, Any
+
+
+logger = logging.getLogger(__name__)
 
 
 class PromptManager:
@@ -43,14 +47,24 @@ class PromptManager:
         template = prompt_data[key]
         required_vars = set(self.VAR_PATTERN.findall(template))
 
-        # Валидация
-        missing = [v for v in sorted(required_vars) if v not in user_inputs or str(user_inputs.get(v, "")).strip() == ""]
+        # Валидация (мягкая).
+        #
+        # UI и шаблоны могут эволюционировать независимо. Если шаблон содержит переменные,
+        # которые UI по какой-то причине не передал (скрытое поле, разные версии JSON, и т.д.),
+        # падать нельзя: лучше безопасно подставить пустую строку и продолжить.
+        missing = [v for v in sorted(required_vars) if v not in user_inputs]
         if missing:
-            raise ValueError(f"Не заполнены обязательные поля: {', '.join(missing)}")
+            logger.warning("Prompt '%s' missing vars: %s", prompt_id, ", ".join(missing))
+            for v in missing:
+                user_inputs[v] = ""
 
         def repl(match: re.Match) -> str:
             var = match.group(1)
-            return str(user_inputs.get(var, match.group(0)))
+            # Missing vars are substituted with empty strings.
+            val = user_inputs.get(var, "")
+            if val is None:
+                return ""
+            return str(val)
 
         return self.VAR_PATTERN.sub(repl, template)
 

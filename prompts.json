@@ -39,13 +39,27 @@
     "title": "07. Смена позы",
     "description": "Перестройка сцены: новая поза для тех же персонажей.",
     "prompt_ru": "Пересоздать сцену на основе [image_1]. Изменить позу персонажей на: [action_description]. КРИТИЧНО: если поза предполагает поднятие на руки, ноги поднимаемого персонажа ДОЛЖНЫ быть оторваны от земли. Сохранить лица (identity) и детали одежды. Фон и освещение — как в оригинале. Естественная анатомия и распределение веса. Формат [aspect_ratio], 4K, sRGB. Без текста/водяных знаков.",
-    "prompt_en": "Recreate the scene based on [image_1]. Change the characters' poses to: [action_description]. CRITICAL: if lifting, the subject's feet MUST be off the ground. Preserve faces (identity) and clothing details. Keep the same background and lighting. Natural anatomy and realistic weight distribution. Format [aspect_ratio], 4K, sRGB. No text/watermarks."
+    "prompt_en": "Recreate the scene based on [image_1]. Change the characters' poses to: [action_description]. CRITICAL: if lifting, the subject's feet MUST be off the ground. Preserve faces (identity) and clothing details. Keep the same background and lighting. Natural anatomy and realistic weight distribution. Format [aspect_ratio], 4K, sRGB. No text/watermarks.",
+    "ui": {
+      "var_order": [
+        "aspect_ratio",
+        "action_description",
+        "image_1"
+      ]
+    }
   },
   "camera_angle_change": {
     "title": "08. Смена ракурса",
     "description": "Пересъемка сцены с новой точки обзора.",
     "prompt_ru": "Воссоздать сцену с [image_1] с другого ракурса: [camera_angle]. Для вида сверху (top-down / bird’s-eye): камера строго над сценой, 90° overhead, ось камеры перпендикулярна полу, без линии горизонта. Сохранить идентичность персонажей, пропорции тела и детали одежды. Окружение и освещение — как в оригинале. Формат [aspect_ratio], 4K, sRGB. Без текста/водяных знаков.",
-    "prompt_en": "Recreate the scene from [image_1] from a new perspective: [camera_angle]. For top-down / bird’s-eye: camera directly above, true 90° overhead, optical axis perpendicular to the floor, no horizon line. Preserve identity, body proportions, and clothing details. Use the same environment and lighting as the original. Format [aspect_ratio], 4K, sRGB. No text/watermarks."
+    "prompt_en": "Recreate the scene from [image_1] from a new perspective: [camera_angle]. For top-down / bird’s-eye: camera directly above, true 90° overhead, optical axis perpendicular to the floor, no horizon line. Preserve identity, body proportions, and clothing details. Use the same environment and lighting as the original. Format [aspect_ratio], 4K, sRGB. No text/watermarks.",
+    "ui": {
+      "var_order": [
+        "aspect_ratio",
+        "camera_angle",
+        "image_1"
+      ]
+    }
   },
   "cloth_swap": {
     "title": "09. Виртуальная примерка",
@@ -87,7 +101,15 @@
     "title": "15. Сборка команды",
     "description": "Объединение разных людей в одно групповое фото.",
     "prompt_ru": "Создать реалистичное групповое фото по референсам: [people_links]. Окружение/стиль: [environment]. Сюжет/действие: [activity]. КРИТИЧНО: все персонажи в одном пространстве, корректный относительный масштаб и взаимодействие (взгляды/позы). Единое освещение, цвет и тени для всей группы. Сохранить узнаваемость лиц. Формат [aspect_ratio], 4K, sRGB. Без текста/водяных знаков.",
-    "prompt_en": "Create a realistic group photo using these references: [people_links]. Environment/style: [environment]. Action/mood: [activity]. CRITICAL: all characters share the same 3D space with correct relative scale and interaction (eye contact/poses). Unified lighting, color grading, and shadows. Preserve facial identity. Format [aspect_ratio], 4K, sRGB. No text/watermarks."
+    "prompt_en": "Create a realistic group photo using these references: [people_links]. Environment/style: [environment]. Action/mood: [activity]. CRITICAL: all characters share the same 3D space with correct relative scale and interaction (eye contact/poses). Unified lighting, color grading, and shadows. Preserve facial identity. Format [aspect_ratio], 4K, sRGB. No text/watermarks.",
+    "ui": {
+      "var_order": [
+        "aspect_ratio",
+        "people_links",
+        "environment",
+        "activity"
+      ]
+    }
   },
   "scene_composite": {
     "title": "16. Сложный фотомонтаж",
@@ -105,7 +127,31 @@
     "title": "18. Генерация мокапа",
     "description": "Дизайн на объекте с читаемым текстом/лого.",
     "prompt_ru": "Мокап: наложить дизайн на [object_type], фон/стиль [background_type], покрытие [print_finish]; деформация только по кривизне, текст/логотип читаемы и без ошибок. Студийный свет. Формат [aspect_ratio], 4K, sRGB. Без водяных знаков.",
-    "prompt_en": "Mockup: apply design to [object_type], background/style [background_type], finish [print_finish]; warp only by curvature, text/logo readable and spelled correctly. Studio lighting. Format [aspect_ratio], 4K, sRGB. No watermarks."
+    "prompt_en": "Mockup: apply design to [object_type], background/style [background_type], finish [print_finish]; warp only by curvature, text/logo readable and spelled correctly. Studio lighting. Format [aspect_ratio], 4K, sRGB. No watermarks.",
+    "ui": {
+      "var_order": [
+        "aspect_ratio",
+        "object_type",
+        "background_type",
+        "print_finish",
+        "image_1"
+      ],
+      "force_vars": [
+        "image_1"
+      ],
+      "force_file_vars": [
+        "image_1"
+      ],
+      "label_overrides": {
+        "image_1": "Что наносим? (Лого/Картинка)",
+        "object_type": "На какой предмет наносим? (Футболка/Кепка/...)",
+        "background_type": "Задний фон? (Белый/Прозрачный/Сцена)",
+        "print_finish": "Финиш/эффект печати (Матовый/Глянец/Вышивка/...)"
+      },
+      "help_append": {
+        "image_1": "Загрузите файл дизайна (логотип/картинка), который нужно нанести на мокап."
+      }
+    }
   },
   "environmental_text": {
     "title": "19. Текст в окружении",
@@ -207,7 +253,15 @@
     "title": "35. Обложка YouTube",
     "description": "Вирусное превью 16:9 (только с правами/согласием).",
     "prompt_ru": "YouTube thumbnail 16:9: тип [type], эмоция [expression], лицо 30–40% кадра; текст строго \"[text]\" (3–5 слов) (КРИТИЧНО: не переводить и не менять символы/регистр); крупный с обводкой/тенью, высокий контраст и насыщенные цвета без мелкого мусора. Формат 16:9, 4K, sRGB. Только при наличии прав/согласия. Без водяных знаков. Объект/референс: [object].",
-    "prompt_en": "YouTube thumbnail 16:9: type [type], expression [expression], face 30–40% of frame; text exactly \"[text]\" (3–5 words) (CRITICAL: do not translate or alter characters/case); large with stroke/shadow, high contrast and saturated colors with no tiny clutter. Format 16:9, 4K, sRGB. Only with rights/consent. No watermarks. Object reference: [object]."
+    "prompt_en": "YouTube thumbnail 16:9: type [type], expression [expression], face 30–40% of frame; text exactly \"[text]\" (3–5 words) (CRITICAL: do not translate or alter characters/case); large with stroke/shadow, high contrast and saturated colors with no tiny clutter. Format 16:9, 4K, sRGB. Only with rights/consent. No watermarks. Object reference: [object].",
+    "ui": {
+      "var_order": [
+        "type",
+        "object",
+        "expression",
+        "text"
+      ]
+    }
   },
   "cinematic_atmosphere": {
     "title": "36. Кинематографичная атмосфера",
@@ -236,7 +290,7 @@
   "macro_extreme": {
     "title": "40. Макро-съемка",
     "description": "Экстремальный крупный план текстур.",
-    "prompt_ru": "Макро [object] на фоне/в стиле [background], свет [lighting]; видны микро-текстуры/пыль/неровности и капли (если нужно), очень малая DOF и сливочное боке; focus stacking: [focus_stacking]. Формат [aspect_ratio], 4K, sRGB. Без текста/водяных знаков.",
-    "prompt_en": "Macro [object] on background/style [background], lighting [lighting]; visible micro-texture/dust/imperfections and droplets if needed, razor-thin DOF with creamy bokeh; focus stacking: [focus_stacking]. Format [aspect_ratio], 4K, sRGB. No text/watermarks."
+    "prompt_ru": "Макро [object] на фоне/в стиле [background], свет [lighting]; Дополнительные детали: [additional_details]; видны микро-текстуры/пыль/неровности и капли (если нужно), очень малая DOF и сливочное боке; focus stacking: [focus_stacking]. Формат [aspect_ratio], 4K, sRGB. Без текста/водяных знаков.",
+    "prompt_en": "Macro [object] on background/style [background], lighting [lighting]; Additional details: [additional_details]; visible micro-texture/dust/imperfections and droplets if needed, razor-thin DOF with creamy bokeh; focus stacking: [focus_stacking]. Format [aspect_ratio], 4K, sRGB. No text/watermarks."
   }
 }

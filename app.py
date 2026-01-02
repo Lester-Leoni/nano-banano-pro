@@ -1,10 +1,18 @@
 import os
+import atexit
+import time
+import unicodedata
 import re
+import threading
 import datetime
 from pathlib import Path
 import json
+import hashlib
+import sys
+import traceback
 
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError, wait as futures_wait, FIRST_COMPLETED
+from typing import List, Tuple
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -14,50 +22,18 @@ from prompt_manager import PromptManager
 # =========================================================
 # FUTURE_SAAS FOUNDATION (no auth/billing implemented)
 # =========================================================
-# These hooks are intentionally no-op by default and must NOT change UX.
+# These hooks are part of the repository and must load reliably.
+# Security principle: fail closed (do not silently disable limits / logging).
 try:
     from future_saas.bootstrap import get_future_config, get_request_context, get_usage_recorder
     from future_saas.errors import public_error_message
     from future_saas.limits import enforce_usage_limits
     from future_saas.usage import UsageAction, make_event
-except Exception:  # pragma: no cover
-    def get_future_config():  # type: ignore
-        class _Cfg:
-            debug_errors = False
-
-        return _Cfg()
-
-    def get_request_context():  # type: ignore
-        class _Ctx:
-            request_id = ""
-            session_id = ""
-            user = None
-            api_client = None
-            tier = type("_T", (), {"value": "free"})()
-
-        return _Ctx()
-
-    def get_usage_recorder():  # type: ignore
-        class _Rec:
-            def record(self, *args, **kwargs):
-                return None
-
-        return _Rec()
-
-    def enforce_usage_limits(*args, **kwargs):  # type: ignore
-        return True
-
-    def make_event(*args, **kwargs):  # type: ignore
-        return None
-
-    class UsageAction:  # type: ignore
-        GENERATE_PROMPT = "generate_prompt"
-        TRANSLATE = "translate"
-        DOWNLOAD_RESULT = "download_result"
-        COPY_RESULT = "copy_result"
-
-    def public_error_message(exc: Exception, *, debug: bool = False) -> str:  # type: ignore
-        return f"❌ Ошибка: {exc}" if debug else "❌ Ошибка при генерации. Попробуйте снова."
+except ImportError as e:  # pragma: no cover
+    raise RuntimeError(
+        "future_saas is required but could not be imported. "
+        "Ensure the repository contains the future_saas/ package."
+    ) from e
 
 # Копирование в буфер: используем пакет, если установлен; иначе — JS fallback.
 try:
@@ -87,7 +63,7 @@ except Exception:
               </button>
             </div>
             <script>
-              const btn = window.parent.document.getElementById('{btn_id}');
+              const btn = document.getElementById('{btn_id}');
               const b64 = '{b64}';
               const decodeB64Utf8 = (s) => {{
                 try {{
@@ -121,12 +97,40 @@ except Exception:
     GoogleTranslator = None
 
 
+# PIL is used only for lightweight image structure verification.
+try:
+    from PIL import Image  # type: ignore
+except Exception:
+    Image = None
+
+
 # =========================================================
 # PATHS
 # =========================================================
 BASE_DIR = Path(__file__).resolve().parent
 PROMPTS_PATH = BASE_DIR / "prompts.json"
 ASSETS_DIR = BASE_DIR / "assets"
+
+
+@st.cache_data(show_spinner=False)
+def resolve_preview_image(prompt_id: str) -> str | None:
+    """Resolve preview asset path for a prompt id (cached to avoid per-rerun FS checks)."""
+    if not prompt_id:
+        return None
+    try:
+        if not ASSETS_DIR.exists():
+            return None
+    except Exception:
+        return None
+    for ext in (".jpg", ".png"):
+        p = ASSETS_DIR / f"{prompt_id}{ext}"
+        try:
+            if p.exists():
+                return str(p)
+        except Exception:
+            continue
+    return None
+
 
 
 def _env_int(name: str, default: int) -> int:
@@ -138,17 +142,82 @@ def _env_int(name: str, default: int) -> int:
         return int(default)
 
 
+def _env_float(name: str, default: float) -> float:
+    """Безопасно парсит float из переменных окружения."""
+    try:
+        raw = (os.getenv(name) or "").strip()
+        return float(raw) if raw else float(default)
+    except Exception:
+        return float(default)
+
+
+def _env_bool(name: str, default: bool) -> bool:
+    """Безопасно парсит bool из переменных окружения."""
+    raw = (os.getenv(name) or "").strip().lower()
+    if raw in {"1", "true", "yes", "y", "on"}:
+        return True
+    if raw in {"0", "false", "no", "n", "off"}:
+        return False
+    return bool(default)
+
+
 # Лимит загрузки файлов в UI (DoS-guard). По умолчанию 8MB.
 UI_MAX_FILE_BYTES = _env_int("NANOBANANO_UI_MAX_FILE_BYTES", 8 * 1024 * 1024)
 
+# Дополнительные лимиты загрузки.
+UI_MAX_UPLOAD_FILES = _env_int("NANOBANANO_UI_MAX_UPLOAD_FILES", 12)
+UI_MAX_TOTAL_UPLOAD_BYTES = _env_int("NANOBANANO_UI_MAX_TOTAL_UPLOAD_BYTES", 32 * 1024 * 1024)
+
+# Перевод (можно отключить полностью).
+TRANSLATION_ENABLED_DEFAULT = _env_bool("NANOBANANO_TRANSLATION_ENABLED", True)
+
 # Таймауты/лимиты для переводчика (hardening).
-TRANSLATE_TIMEOUT_SEC = _env_int("NANOBANANO_TRANSLATE_TIMEOUT_SEC", 8)
+# Важно: перевод вызывается из UI-треда, поэтому дефолт держим коротким.
+TRANSLATE_TIMEOUT_SEC = _env_float("NANOBANANO_TRANSLATE_TIMEOUT_SEC", 2.0)
 TRANSLATE_MAX_CHARS = _env_int("NANOBANANO_TRANSLATE_MAX_CHARS", 4000)
+TRANSLATE_MAX_CONCURRENCY = _env_int("NANOBANANO_TRANSLATE_MAX_CONCURRENCY", 1)
+TRANSLATE_ACQUIRE_TIMEOUT_SEC = _env_float("NANOBANANO_TRANSLATE_ACQUIRE_TIMEOUT_SEC", 0.1)
+TRANSLATE_CACHE_TTL_SEC = _env_int("NANOBANANO_TRANSLATE_CACHE_TTL_SEC", 3600)
+TRANSLATE_CACHE_MAX_ENTRIES = _env_int("NANOBANANO_TRANSLATE_CACHE_MAX_ENTRIES", 256)
+TRANSLATE_CACHE_MAX_BYTES = _env_int("NANOBANANO_TRANSLATE_CACHE_MAX_BYTES", 2_000_000)
+TRANSLATE_GLOBAL_BUDGET_SEC = _env_float(
+    "NANOBANANO_TRANSLATE_GLOBAL_BUDGET_SEC",
+    max(0.2, float(TRANSLATE_TIMEOUT_SEC) * max(1, int(TRANSLATE_MAX_CONCURRENCY))),
+)
+
+# Privacy/supply-chain hardening: allow disabling external font loads in public deployments.
+PUBLIC_DEPLOYMENT = _env_bool("NANOBANANO_PUBLIC_DEPLOYMENT", False)
+ALLOW_EXTERNAL_FONTS = _env_bool("NANOBANANO_ALLOW_EXTERNAL_FONTS", not PUBLIC_DEPLOYMENT)
+EXTERNAL_FONT_IMPORT = (
+    "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');"
+    if ALLOW_EXTERNAL_FONTS
+    else ""
+)
 
 @st.cache_resource
 def get_translate_executor() -> ThreadPoolExecutor:
     """Shared executor for translation calls (prevents indefinite hangs)."""
-    return ThreadPoolExecutor(max_workers=4)
+    ex = ThreadPoolExecutor(max_workers=max(1, int(TRANSLATE_MAX_CONCURRENCY)))
+
+    # Ensure worker threads don't leak across long-lived/reloaded processes.
+    def _shutdown_executor() -> None:
+        try:
+            ex.shutdown(wait=False, cancel_futures=True)
+        except TypeError:
+            # Python < 3.9: no cancel_futures
+            ex.shutdown(wait=False)
+        except Exception:
+            pass
+
+    atexit.register(_shutdown_executor)
+    return ex
+
+
+@st.cache_resource
+def get_translate_semaphore() -> threading.Semaphore:
+    """Global (process-wide) ограничитель конкурентных обращений к переводчику."""
+    # Даже при нескольких сессиях Streamlit мы не хотим пачкой бить во внешний переводчик.
+    return threading.Semaphore(max(1, int(TRANSLATE_MAX_CONCURRENCY)))
 
 
 @st.cache_resource
@@ -178,24 +247,55 @@ st.set_page_config(
 components.html(
     """
     <script>
-    function removeTitles() {
-        const elems = window.parent.document.querySelectorAll('div[data-baseweb="select"] *');
-        elems.forEach(el => {
-            if (el.hasAttribute('title')) el.removeAttribute('title');
+    (function () {
+        const root = (window.parent && window.parent.document) ? window.parent.document : document;
+
+        function removeTitles() {
+            const selects = root.querySelectorAll('div[data-baseweb="select"]');
+            if (!selects || !selects.length) return;
+            selects.forEach(sel => {
+                const titled = sel.querySelectorAll('[title]');
+                titled.forEach(el => {
+                    el.removeAttribute('title');
+                });
+            });
+        }
+
+        let scheduled = false;
+        function scheduleRemoveTitles() {
+            if (scheduled) return;
+            scheduled = true;
+            setTimeout(() => {
+                scheduled = false;
+                removeTitles();
+            }, 150);
+        }
+
+        const observer = new MutationObserver((mutations) => {
+            for (const m of mutations) {
+                if (m.addedNodes && m.addedNodes.length) {
+                    scheduleRemoveTitles();
+                    return;
+                }
+            }
         });
-    }
-    const observer = new MutationObserver(() => removeTitles());
-    observer.observe(window.parent.document.body, { childList: true, subtree: true });
-    setTimeout(removeTitles, 800);
+
+        try {
+            observer.observe(root.body, { childList: true, subtree: true });
+        } catch (e) {
+            // ignore
+        }
+        setTimeout(removeTitles, 800);
+    })();
     </script>
     """,
     height=0,
 )
 
 st.markdown(
-    """
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    "<style>\n"
+    + (EXTERNAL_FONT_IMPORT + "\n" if EXTERNAL_FONT_IMPORT else "")
+    + """
 
 /* GLOBAL THEME */
 [data-testid="stAppViewContainer"] {
@@ -447,6 +547,7 @@ VAR_MAP = {
     "expression": "Выражение лица (превью)",
     "subject": "Главный объект",
     "focus_stacking": "Глубина резкости (фокус-стекинг)",
+    "additional_details": "Дополнительные детали",
 }
 
 # -------------------------------------------------------------
@@ -669,6 +770,7 @@ OPTIONAL_FIELD_TOGGLES = {
     ("total_look_builder", "footwear_image"): {"label": "Добавить обувь", "default": True},
     ("total_look_builder", "accessory_image"): {"label": "Добавить аксессуар", "default": False},
     ("logo_creative", "imagery"): {"label": "Добавить образ-символ", "default": False},
+    ("macro_extreme", "additional_details"): {"label": "Добавить: Дополнительные детали", "default": False},
 }
 
 # --- D. HELPERS ---
@@ -718,68 +820,553 @@ def get_help(var: str, prompt_id: str) -> str:
 def has_cyrillic(s: str) -> bool:
     return bool(re.search(r"[А-Яа-яЁё]", s))
 
+
+_SPACE_RUN_RE = re.compile(r"[ \t\r\f\v]+")
+
+
+def normalize_translate_cache_key(text: str) -> str:
+    """Нормализует текст для ключа кэша перевода (консервативно).
+
+    - strip()
+    - нормализует переносы строк в \n
+    - схлопывает пробелы/табы внутри строк (не трогая границы строк)
+    """
+    raw = "" if text is None else str(text)
+    raw = unicodedata.normalize("NFKC", raw)
+    raw = raw.replace("\r\n", "\n").replace("\r", "\n").strip()
+    if not raw:
+        return ""
+    lines = raw.split("\n")
+    lines = [_SPACE_RUN_RE.sub(" ", line.strip()) for line in lines]
+    return "\n".join(lines)
+
 def _push_run_notice(msg: str) -> None:
     """Collect non-fatal runtime notices for the current generation run."""
     lst = st.session_state.get("_nb_run_notices")
     if isinstance(lst, list) and msg and msg not in lst:
         lst.append(msg)
 
+def _add_run_notice(msg: str, level: str = "info") -> None:
+    """Backward-compatible wrapper used by some call sites."""
+    _push_run_notice(msg)
 
-def safe_translate_to_en(text: str, var_name: str) -> str:
-    """Translate to EN only when the value contains Cyrillic.
 
-    Security / stability hardening:
-    - bounded time (no UI hangs)
-    - bounded size (don't ship huge blobs to external translator)
-    - no silent fallbacks (surface a run notice)
-    """
+def _approx_utf8_size(s: str) -> int:
+    try:
+        return len((s or "").encode("utf-8", errors="ignore"))
+    except Exception:
+        return len(s or "")
+
+
+def _translate_cache_get(cache: dict, key: str) -> str | None:
+    if not isinstance(cache, dict):
+        return None
+    v = cache.get(key)
+    if not isinstance(v, str):
+        return None
+    # Refresh LRU order (dict preserves insertion order).
+    try:
+        cache.pop(key, None)
+        cache[key] = v
+    except Exception:
+        pass
+    return v
+
+
+def _translate_cache_put(cache: dict, key: str, value: str) -> None:
+    """Insert into the per-session translate cache with entry and byte caps."""
+    if not isinstance(cache, dict) or not isinstance(key, str) or not isinstance(value, str):
+        return
+
+    # Track approximate UTF-8 size in session state.
+    cur_bytes = st.session_state.get("_nb_translate_cache_bytes")
+    cur_bytes = int(cur_bytes) if isinstance(cur_bytes, int) else 0
+
+    old = cache.get(key)
+    if isinstance(old, str):
+        cur_bytes -= _approx_utf8_size(key) + _approx_utf8_size(old)
+        try:
+            cache.pop(key, None)
+        except Exception:
+            pass
+
+    cache[key] = value
+    cur_bytes += _approx_utf8_size(key) + _approx_utf8_size(value)
+
+    # Evict oldest entries until within caps.
+    while len(cache) > max(1, int(TRANSLATE_CACHE_MAX_ENTRIES)) or cur_bytes > max(0, int(TRANSLATE_CACHE_MAX_BYTES)):
+        try:
+            oldest_key = next(iter(cache))
+        except StopIteration:
+            break
+        oldest_val = cache.pop(oldest_key, None)
+        if isinstance(oldest_val, str):
+            cur_bytes -= _approx_utf8_size(oldest_key) + _approx_utf8_size(oldest_val)
+
+    st.session_state["_nb_translate_cache_bytes"] = max(0, int(cur_bytes))
+
+
+def format_bytes(n: int) -> str:
+    """Human-readable bytes formatter (B/KB/MB/GB)."""
+    try:
+        n_int = int(n)
+    except Exception:
+        n_int = 0
+    n_int = max(0, n_int)
+    units = ["B", "KB", "MB", "GB", "TB"]
+    size = float(n_int)
+    idx = 0
+    while size >= 1024.0 and idx < len(units) - 1:
+        size /= 1024.0
+        idx += 1
+    if idx == 0:
+        return f"{int(size)}{units[idx]}"
+    return f"{size:.1f}{units[idx]}"
+
+
+
+def safe_translate_to_en(text: str, var_name: str) -> Tuple[str, bool]:
+    """Translate RU->EN safely. Returns (translated_or_original, ok)."""
     raw = "" if text is None else str(text)
-    if not raw.strip():
-        return ""
-    if raw.strip().startswith(("http", "www")):
-        return raw
-    if var_name in ["text", "text_content"]:
-        return raw
 
+    # Enum-like values: keep the chosen option stable (do not translate UI labels).
+    if raw.startswith("Optional:") and "(" in raw and raw.endswith(")"):
+        m = re.match(r"Optional:\s*(.*?)\s*\((.*?)\)\s*$", raw)
+        if m:
+            raw = m.group(1).strip() or raw
+    if raw.startswith("Выберите:") and "(" in raw and raw.endswith(")"):
+        m = re.match(r"Выберите:\s*(.*?)\s*\((.*?)\)\s*$", raw)
+        if m:
+            raw = m.group(1).strip() or raw
+
+    # URL-like values should not be translated.
+    s = raw.strip().lower()
+    if s.startswith(("http://", "https://", "www.")):
+        return raw, True
+
+    # No translation needed.
     if not has_cyrillic(raw):
-        return raw
+        return raw, True
 
-    # Keep some enum-like values stable (avoid translating parenthetical hints)
-    if "(" in raw and ")" in raw:
-        clean_val = raw.split("(")[0].strip()
-        if var_name in ["aspect_ratio", "lens"]:
-            return clean_val
+    if not st.session_state.get("nb_translation_enabled", TRANSLATION_ENABLED_DEFAULT):
+        # User opted out; keep original.
+        return raw, True
 
     if len(raw) > TRANSLATE_MAX_CHARS:
         _push_run_notice(
-            f"Перевод пропущен: поле '{VAR_MAP.get(var_name, var_name)}' слишком длинное "
-            f"({len(raw)} символов > {TRANSLATE_MAX_CHARS})."
+            f"Перевод пропущен: поле '{var_name}' слишком длинное ({len(raw)} символов, лимит {TRANSLATE_MAX_CHARS})."
         )
-        return raw
+        return raw, False
 
     tr = get_translator_en()
     if tr is None:
-        _push_run_notice(
-            "Перевод пропущен: deep-translator недоступен. EN-результат может содержать кириллицу."
-        )
-        return raw
+        _push_run_notice(f"Перевод пропущен: переводчик не доступен (поле '{var_name}').")
+        return raw, False
 
-    # FUTURE_SAAS_HOOK: usage accounting (metadata only).
-    counters = st.session_state.get("_nb_usage_counters")
-    if isinstance(counters, dict):
-        counters["translate_calls"] = int(counters.get("translate_calls", 0)) + 1
-        counters["translate_chars"] = int(counters.get("translate_chars", 0)) + len(raw)
+    cache = st.session_state.setdefault("_nb_translate_cache", {})
+    cache_key = normalize_translate_cache_key(raw)
+
+    cached = _translate_cache_get(cache, cache_key)
+    if cached is not None:
+        return cached, True
+
+    sem = get_translate_semaphore()
+    if not sem.acquire(timeout=TRANSLATE_ACQUIRE_TIMEOUT_SEC):
+        _push_run_notice(f"Перевод пропущен: переводчик перегружен (поле '{var_name}').")
+        return raw, False
+
+    released = False
+
+    def _release(_fut=None) -> None:
+        nonlocal released
+        if released:
+            return
+        released = True
+        try:
+            sem.release()
+        except Exception:
+            pass
+
+    fut = None
+    try:
+        # Usage counters are metadata-only; ignore failures.
+        try:
+            counters = st.session_state.get("_nb_usage_counters")
+            if isinstance(counters, dict):
+                counters["translate_calls"] = int(counters.get("translate_calls", 0)) + 1
+                counters["translate_chars"] = int(counters.get("translate_chars", 0)) + len(raw)
+        except Exception:
+            pass
+
+        ex = get_translate_executor()
+        fut = ex.submit(tr.translate, cache_key)
+        fut.add_done_callback(_release)
+
+        translated = fut.result(timeout=TRANSLATE_TIMEOUT_SEC)
+        if not isinstance(translated, str) or not translated.strip():
+            _push_run_notice(f"Перевод не удался: пустой ответ (поле '{var_name}').")
+            return raw, False
+
+        _translate_cache_put(cache, cache_key, translated)
+        return translated, True
+
+    except FuturesTimeoutError:
+        try:
+            if fut is not None:
+                fut.cancel()
+        except Exception:
+            pass
+        _push_run_notice(f"Перевод превысил таймаут для поля '{var_name}'. Используется исходный текст.")
+        return raw, False
+
+    except Exception as e:
+        _push_run_notice(f"Перевод не удался для поля '{var_name}': {type(e).__name__}. Используется исходный текст.")
+        return raw, False
+
+    finally:
+        # If submit failed before the callback was attached, release the token here.
+        if not released and fut is None:
+            _release()
+
+
+def translate_user_inputs_to_en(user_inputs: dict) -> Tuple[dict, List[str]]:
+    """Translate all eligible fields RU->EN with a global time budget to avoid N*timeout stalls."""
+    i_en: dict = {}
+    fallback_keys: List[str] = []
+
+    # Fast path: if translation is disabled, do nothing (but still return original values).
+    translation_enabled = bool(st.session_state.get("nb_translation_enabled", TRANSLATION_ENABLED_DEFAULT))
+
+    cache = st.session_state.setdefault("_nb_translate_cache", {})
+
+    # Collect translation tasks keyed by cache_key (dedupe within the run).
+    key_order: List[str] = []
+    field_to_key: dict = {}
+    key_to_raw: dict = {}
+    key_to_var: dict = {}
+
+    for k, v in (user_inputs or {}).items():
+        sv = "" if v is None else str(v)
+
+        # Don't translate free-text fields (they can be intentionally multilingual).
+        if k in ("text", "text_content"):
+            i_en[k] = v
+            continue
+
+        # Don't translate file placeholders.
+        if sv.startswith("[") and ("FILE" in sv or "ATTACHED" in sv):
+            i_en[k] = v
+            continue
+
+        # Enum-like values: keep the chosen option stable.
+        raw = sv
+        if raw.startswith("Optional:") and "(" in raw and raw.endswith(")"):
+            m = re.match(r"Optional:\s*(.*?)\s*\((.*?)\)\s*$", raw)
+            if m:
+                raw = m.group(1).strip() or raw
+        if raw.startswith("Выберите:") and "(" in raw and raw.endswith(")"):
+            m = re.match(r"Выберите:\s*(.*?)\s*\((.*?)\)\s*$", raw)
+            if m:
+                raw = m.group(1).strip() or raw
+
+        # URL-like values should not be translated.
+        s = raw.strip().lower()
+        if s.startswith(("http://", "https://", "www.")) or not raw:
+            i_en[k] = v
+            continue
+
+        # No translation needed.
+        if not has_cyrillic(raw) or not translation_enabled:
+            i_en[k] = v
+            continue
+
+        if len(raw) > TRANSLATE_MAX_CHARS:
+            _push_run_notice(
+                f"Перевод пропущен: поле '{k}' слишком длинное ({len(raw)} символов, лимит {TRANSLATE_MAX_CHARS})."
+            )
+            i_en[k] = v
+            fallback_keys.append(k)
+            continue
+
+        cache_key = normalize_translate_cache_key(raw)
+        cached = _translate_cache_get(cache, cache_key)
+        if cached is not None:
+            i_en[k] = cached
+            continue
+
+        # Defer translation; we'll submit with a global budget below.
+        field_to_key[k] = cache_key
+        key_to_var.setdefault(cache_key, k)
+        key_to_raw.setdefault(cache_key, raw)
+        if cache_key not in key_order:
+            key_order.append(cache_key)
+
+    if not key_order:
+        return i_en, fallback_keys
+
+    tr = get_translator_en()
+    if tr is None:
+        for k in field_to_key:
+            fallback_keys.append(k)
+        _push_run_notice("Перевод пропущен: переводчик не доступен.")
+        for k, v in (user_inputs or {}).items():
+            i_en.setdefault(k, v)
+        return i_en, fallback_keys
+
+    sem = get_translate_semaphore()
+    ex = get_translate_executor()
+
+    deadline = time.monotonic() + float(TRANSLATE_GLOBAL_BUDGET_SEC)
+    max_inflight = max(1, int(TRANSLATE_MAX_CONCURRENCY))
+
+    results: dict = {}  # cache_key -> (translated, ok)
+
+    inflight: dict = {}  # cache_key -> future
+    idx = 0
+
+    def _make_release_cb() -> callable:
+        released = {"v": False}
+
+        def _cb(_fut=None) -> None:
+            if released["v"]:
+                return
+            released["v"] = True
+            try:
+                sem.release()
+            except Exception:
+                pass
+
+        return _cb
+
+    while time.monotonic() < deadline and (idx < len(key_order) or inflight):
+        # Fill inflight up to concurrency.
+        while idx < len(key_order) and len(inflight) < max_inflight and time.monotonic() < deadline:
+            key = key_order[idx]
+            idx += 1
+
+            # Avoid resubmitting if already resolved.
+            if key in results:
+                continue
+
+            if not sem.acquire(timeout=TRANSLATE_ACQUIRE_TIMEOUT_SEC):
+                # Overloaded: fall back for this key.
+                results[key] = (key_to_raw.get(key, ""), False)
+                _push_run_notice(f"Перевод пропущен: переводчик перегружен (поле '{key_to_var.get(key, '?')}').")
+                continue
+
+            # Usage counters are metadata-only; ignore failures.
+            try:
+                counters = st.session_state.get("_nb_usage_counters")
+                if isinstance(counters, dict):
+                    counters["translate_calls"] = int(counters.get("translate_calls", 0)) + 1
+                    counters["translate_chars"] = int(counters.get("translate_chars", 0)) + len(key_to_raw.get(key, ""))
+            except Exception:
+                pass
+
+            fut = ex.submit(tr.translate, key)
+            fut.add_done_callback(_make_release_cb())
+            inflight[key] = fut
+
+        if not inflight:
+            break
+
+        remaining = max(0.0, deadline - time.monotonic())
+        done, _ = futures_wait(list(inflight.values()), timeout=remaining, return_when=FIRST_COMPLETED)
+        if not done:
+            break
+
+        for key, fut in list(inflight.items()):
+            if fut not in done:
+                continue
+            try:
+                translated = fut.result()
+                if isinstance(translated, str) and translated.strip():
+                    _translate_cache_put(cache, key, translated)
+                    results[key] = (translated, True)
+                else:
+                    results[key] = (key_to_raw.get(key, ""), False)
+                    _push_run_notice(f"Перевод не удался: пустой ответ (поле '{key_to_var.get(key, '?')}').")
+            except Exception as e:
+                results[key] = (key_to_raw.get(key, ""), False)
+                _push_run_notice(
+                    f"Перевод не удался для поля '{key_to_var.get(key, '?')}': {type(e).__name__}. Используется исходный текст."
+                )
+            inflight.pop(key, None)
+
+    # Global budget expired: cancel inflight and fall back.
+    for key, fut in list(inflight.items()):
+        try:
+            fut.cancel()
+        except Exception:
+            pass
+        results.setdefault(key, (key_to_raw.get(key, ""), False))
+        _push_run_notice(f"Перевод превысил таймаут для поля '{key_to_var.get(key, '?')}'. Используется исходный текст.")
+
+    # Fill outputs for fields that were deferred.
+    for field, key in field_to_key.items():
+        translated, ok = results.get(key, (key_to_raw.get(key, ""), False))
+        i_en[field] = translated
+        if not ok and has_cyrillic(key_to_raw.get(key, "")):
+            fallback_keys.append(field)
+
+    # Preserve non-translated fields that might not have been set above.
+    for k, v in (user_inputs or {}).items():
+        i_en.setdefault(k, v)
+
+    return i_en, fallback_keys
+
+
+def _redact_filename(name: str) -> str:
+    """Скрывает пользовательское имя файла в UI."""
+    try:
+        _, ext = os.path.splitext(name or "")
+        digest = hashlib.sha256((name or "").encode("utf-8", errors="ignore")).hexdigest()[:12]
+        return f"file-{digest}{ext}"
+    except Exception:
+        return "file-redacted"
+
+
+
+
+# --- Upload signature validation (lightweight) ---
+
+def _read_file_head(uploaded_file, n: int = 32) -> bytes:
+    """Read the first n bytes without consuming the stream (best-effort)."""
+    if uploaded_file is None:
+        return b""
+    pos = None
+    try:
+        pos = uploaded_file.tell()
+    except Exception:
+        pos = None
+    try:
+        head = uploaded_file.read(n)
+    except Exception:
+        head = b""
+    finally:
+        try:
+            if pos is not None:
+                uploaded_file.seek(pos)
+            else:
+                uploaded_file.seek(0)
+        except Exception:
+            pass
+    return head or b""
+
+
+def _detect_image_type_from_header(header: bytes) -> str | None:
+    """Detect image type from magic bytes. Returns: 'png' | 'jpeg' | 'webp' | None."""
+    if not header:
+        return None
+    if header.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "png"
+    if header.startswith(b"\xff\xd8\xff"):
+        return "jpeg"
+    if len(header) >= 12 and header[0:4] == b"RIFF" and header[8:12] == b"WEBP":
+        return "webp"
+    return None
+
+
+
+def _is_allowed_image_upload(uploaded_file, allowed_exts: set[str]) -> bool:
+    """Validate that the uploaded file is a real PNG/JPEG/WebP (header check).
+
+    We do not trust the filename extension alone.
+    """
+    name = getattr(uploaded_file, 'name', '') or ''
+    ext = name.rsplit('.', 1)[-1].lower() if '.' in name else ''
+    header = _read_file_head(uploaded_file, 32)
+    detected = _detect_image_type_from_header(header)
+    if detected is None:
+        return False
+
+    # Normalize detected to common extensions
+    if detected == 'jpeg':
+        detected_ext = 'jpg'
+    else:
+        detected_ext = detected
+
+    # If extension is known, require it matches detected format (jpg/jpeg treated as one)
+    if ext:
+        if ext == 'jpeg':
+            ext = 'jpg'
+        if ext in allowed_exts and ext != detected_ext:
+            return False
+
+    return detected_ext in allowed_exts
+
+
+def _uploaded_file_size(uploaded_file) -> int:
+    """
+    Determine file size without copying contents into memory.
+    """
+    try:
+        size = getattr(uploaded_file, "size", None)
+        if isinstance(size, int):
+            return max(0, size)
+    except Exception:
+        pass
 
     try:
-        ex = get_translate_executor()
-        fut = ex.submit(tr.translate, raw)
-        return fut.result(timeout=TRANSLATE_TIMEOUT_SEC)
-    except FuturesTimeoutError:
-        _push_run_notice(f"Перевод превысил таймаут {TRANSLATE_TIMEOUT_SEC}s — оставляем исходный текст.")
-        return raw
+        if hasattr(uploaded_file, "seek") and hasattr(uploaded_file, "tell"):
+            current_pos = uploaded_file.tell()
+            uploaded_file.seek(0, 2)   # SEEK_END
+            size = uploaded_file.tell()
+            uploaded_file.seek(current_pos)
+            return size
     except Exception:
-        _push_run_notice("Перевод не удался — оставляем исходный текст.")
-        return raw
+        pass
+
+    try:
+        if hasattr(uploaded_file, "getbuffer"):
+            return len(uploaded_file.getbuffer())
+    except Exception:
+        pass
+
+    return 0
+
+
+def _verify_image_upload(uploaded_file) -> bool:
+    """Verify image structure using PIL when available."""
+    if Image is None or uploaded_file is None:
+        return True
+    pos = None
+    try:
+        pos = uploaded_file.tell()
+    except Exception:
+        pos = None
+    try:
+        try:
+            uploaded_file.seek(0)
+        except Exception:
+            pass
+        img = Image.open(uploaded_file)
+        img.verify()
+        return True
+    except Exception:
+        return False
+    finally:
+        try:
+            if pos is not None:
+                uploaded_file.seek(pos)
+        except Exception:
+            pass
+
+def redact_payload_for_ui(payload: dict) -> dict:
+    """Возвращает копию payload, безопасную для вывода в st.json."""
+    if not isinstance(payload, dict):
+        return payload
+    out = dict(payload)
+    files = out.get("files")
+    if isinstance(files, dict):
+        safe_files = {}
+        for k, v in files.items():
+            if isinstance(v, list):
+                safe_files[k] = [_redact_filename(x) for x in v]
+            else:
+                safe_files[k] = v
+        out["files"] = safe_files
+    return out
 
 
 def normalize_special_vars(d: dict, lang="en") -> dict:
@@ -836,22 +1423,83 @@ def should_add_cyrillic_lock(inputs: dict) -> bool:
     return False
 
 def cleanup_optional_prompt(text, prompt_id, disabled_vars, lang):
-    if not text or not disabled_vars: return (text or "").strip()
+    if not text or not disabled_vars:
+        return (text or "").strip()
+
     t = text
+
     if prompt_id == "total_look_builder":
-        if "accessory_image" in disabled_vars: t = re.sub(r"\s*Accessory:\s*\.(\s*)", " ", t, flags=re.IGNORECASE)
-        if "footwear_image" in disabled_vars: t = re.sub(r"\s*Footwear:\s*\.(\s*)", " ", t, flags=re.IGNORECASE)
+        if "accessory_image" in disabled_vars:
+            t = re.sub(r"\s*(Accessory|Аксессуар):\s*\.(\s*)", " ", t, flags=re.IGNORECASE)
+        if "footwear_image" in disabled_vars:
+            t = re.sub(r"\s*(Footwear|Обувь):\s*\.(\s*)", " ", t, flags=re.IGNORECASE)
+
     if prompt_id == "logo_creative" and "imagery" in disabled_vars:
         term = "imagery" if lang.startswith("en") else "образ"
         t = re.sub(rf"\b{term}\b\s*,\s*", "", t, flags=re.IGNORECASE)
-    
+
+    if prompt_id == "macro_extreme" and "additional_details" in disabled_vars:
+        if lang.startswith("ru"):
+            t = re.sub(r"\s*Дополнительные детали:\s*[^;]*;\s*", " ", t, flags=re.IGNORECASE)
+        else:
+            t = re.sub(r"\s*Additional details:\s*[^;]*;\s*", " ", t, flags=re.IGNORECASE)
+
     t = re.sub(r"\s{2,}", " ", t)
     return t.replace(" .", ".").replace(" ,", ",").strip()
+
+
+def _store_last_generate_error(prompt_id: str, exc: BaseException) -> None:
+    """Store the last prompt-generation error in session state for UI display."""
+    tb = traceback.format_exc()
+    st.session_state["_nb_last_generate_error"] = {
+        "at": datetime.datetime.now().isoformat(timespec="seconds"),
+        "prompt_id": prompt_id,
+        "type": type(exc).__name__,
+        "message": str(exc),
+        "traceback": (tb[-8000:] if tb else ""),
+    }
+
+
+def render_last_generate_error_ui(slot) -> None:
+    """Render the last stored generation error into the provided Streamlit slot."""
+    err = st.session_state.get("_nb_last_generate_error")
+    if not err:
+        return
+    with slot.container():
+        with st.expander("⚠️ Детали последней ошибки генерации", expanded=False):
+            st.markdown(f"**Время:** {err.get('at', '-')}")
+            st.markdown(f"**Задача (ID):** `{err.get('prompt_id', '-')}`")
+            st.markdown(f"**Тип:** {err.get('type', '-')}")
+            if err.get("message"):
+                st.markdown(f"**Сообщение:** {err.get('message')}")
+            if err.get("traceback"):
+                st.code(err.get("traceback", ""), language="text")
+            if st.button("Очистить", key="clear_last_generate_error"):
+                st.session_state.pop("_nb_last_generate_error", None)
+                st.rerun()
 
 # =========================================================
 # 4) ENGINE LOADING
 # =========================================================
-manager = PromptManager(str(PROMPTS_PATH)) if PROMPTS_PATH.exists() else None
+
+def _prompts_mtime_ns(path: Path) -> int:
+    try:
+        return int(path.stat().st_mtime_ns)
+    except Exception:
+        return 0
+
+
+@st.cache_resource
+def _get_prompt_manager(prompts_path: str, mtime_ns: int) -> PromptManager:
+    # `mtime_ns` is only for cache invalidation.
+    return PromptManager(prompts_path)
+
+
+manager = (
+    _get_prompt_manager(str(PROMPTS_PATH), _prompts_mtime_ns(PROMPTS_PATH))
+    if PROMPTS_PATH.exists()
+    else None
+)
 if not manager:
     st.error("❌ Файл `prompts.json` не найден!")
     st.stop()
@@ -887,19 +1535,23 @@ if "history_counter" not in st.session_state: st.session_state["history_counter"
 
 def save_to_history(task, prompt_en, prompt_ru, payload=None):
     st.session_state["history_counter"] += 1
+    # Не сохраняем raw payload в историю: там могут быть имена файлов / ключи,
+    # и он заметно раздувает session_state.
     st.session_state["history"].insert(0, {
         "task": task, 
         "en": prompt_en, 
         "ru": prompt_ru, 
         "time": datetime.datetime.now().strftime("%H:%M"), 
-        "id": st.session_state["history_counter"], 
-        "payload": payload
+        "id": st.session_state["history_counter"]
     })
     if len(st.session_state["history"]) > 50: st.session_state["history"].pop()
 
 with st.sidebar:
     st.markdown("### 🍌 PRO MENU")
     tab_menu, tab_history = st.tabs(["Меню", "История"])
+
+# Placeholder used later to render last generation error details in the sidebar.
+last_error_details_slot = None
 
 with tab_menu:
     st.write(" ")
@@ -974,11 +1626,7 @@ with tab_menu:
 
     # PREVIEW
     current_prompt_data = all_prompts[selected_id]
-    image_path = None
-    if ASSETS_DIR.exists():
-        for ext in [".jpg", ".png"]:
-            p = ASSETS_DIR / f"{selected_id}{ext}"
-            if p.exists(): image_path = str(p); break
+    image_path = resolve_preview_image(selected_id)
     
     st.markdown("---")
     with st.container(border=True):
@@ -988,9 +1636,30 @@ with tab_menu:
 
     st.markdown("### ⚙️ Настройки")
     neg_category_label = st.selectbox("Негатив (стиль):", NEG_CATEGORY_LABELS, index=0, key="neg_category_label")
-    with st.expander("Дополнительно"):
+    with st.expander("Дополнительно", expanded=False):
         allow_multi_images = st.checkbox("Multi-files (Beta)", False, key="allow_multi_images")
         api_enabled = st.checkbox("API Mode (JSON)", False, key="api_enabled")
+
+        # Details of the last generation error (shown only if an error occurred)
+        last_error_details_slot = st.empty()
+        render_last_generate_error_ui(last_error_details_slot)
+
+    # ---------------------------------------------------------
+    # 🌐 Автоперевод RU→EN (вынесено вниз, чтобы не перекрывать превью)
+    # ---------------------------------------------------------
+    st.markdown("---")
+    st.markdown("#### 🌐 Автоперевод RU→EN")
+    st.checkbox(
+        "Включить автоперевод",
+        key="nb_translation_enabled",
+        value=TRANSLATION_ENABLED_DEFAULT,
+        help=(
+            "Если включено, кириллица в полях для EN будет переводиться с помощью внешнего сервиса "
+            "(deep_translator / Google Translator). Не вводите персональные данные, секреты, ключи "
+            "или конфиденциальную информацию. Если отключено, текст будет использоваться как есть."
+        ),
+    )
+
 
 # =========================================================
 # 10) MAIN FORM CONSTRUCTION
@@ -1005,50 +1674,28 @@ user_inputs = {}
 uploaded_files = {} 
 image_urls = {}    
 opt_disabled = set()
+uploads_total_files = 0
+uploads_total_bytes = 0
+bad_files: list[str] = []
 MULTILINE_TEXT_VARS = {"scene", "scene_description", "action_sequence", "text", "description", "list"}
 
 if not req_vars:
     st.info("✅ Переменные не требуются.")
 else:
-    # --- CUSTOM SORTING FOR SPECIFIC TASKS (Layout Fixes) ---
-    
-    # 07. Pose Change: Format -> Action -> Image
-    if selected_id == "pose_change":
-        custom_order = ["aspect_ratio", "action_description", "image_1"]
-        req_vars = [v for v in custom_order if v in req_vars] + [v for v in req_vars if v not in custom_order]
+    # UI metadata can override layout behavior for specific prompts.
+    ui_meta = current_prompt_data.get("ui", {}) if isinstance(current_prompt_data, dict) else {}
 
-    # 08. Camera Angle: Format -> Angle -> Image
-    elif selected_id == "camera_angle_change":
-        custom_order = ["aspect_ratio", "camera_angle", "image_1"]
-        req_vars = [v for v in custom_order if v in req_vars] + [v for v in req_vars if v not in custom_order]
+    # 1) Force extra vars into the form (e.g., allow uploading logo even if template doesn't reference it).
+    force_vars = ui_meta.get("force_vars", [])
+    if isinstance(force_vars, list):
+        for fv in force_vars:
+            if isinstance(fv, str) and fv and fv not in req_vars:
+                req_vars.append(fv)
 
-    # 14. Total Look: Format/Background (Col 1/2) -> Model/Footwear (Col 1/2) -> Clothes/Acc (Col 1/2)
-    elif selected_id == "total_look_builder":
-        custom_order = [
-            "aspect_ratio", "background",
-            "model_image", "footwear_image",
-            "clothing_image", "accessory_image"
-        ]
-        req_vars = [v for v in custom_order if v in req_vars] + [v for v in req_vars if v not in custom_order]
-
-    # 15. Team Composite: Format/Activity -> People/Env
-    elif selected_id == "team_composite":
-        custom_order = [
-            "aspect_ratio", "activity",
-            "people_links", "environment"
-        ]
-        req_vars = [v for v in custom_order if v in req_vars] + [v for v in req_vars if v not in custom_order]
-
-    # 18. Mockup: Format -> What we apply (Image 1) -> Target Object (Object Type) -> Background -> Finish
-    elif selected_id == "mockup_generation":
-        # Force image_1 into the list if not present, so we can upload a logo
-        if "image_1" not in req_vars:
-            req_vars.append("image_1")
-        
-        custom_order = ["aspect_ratio", "image_1", "object_type", "background_type", "print_finish"]
-        req_vars = [v for v in custom_order if v in req_vars] + [v for v in req_vars if v not in custom_order]
-
-    # Default Rule: If 'aspect_ratio' exists and not already sorted above, put it first
+    # 2) Reorder vars for a better UX.
+    var_order = ui_meta.get("var_order")
+    if isinstance(var_order, list) and var_order:
+        req_vars = [v for v in var_order if v in req_vars] + [v for v in req_vars if v not in var_order]
     elif "aspect_ratio" in req_vars:
         req_vars.remove("aspect_ratio")
         req_vars.insert(0, "aspect_ratio")
@@ -1064,19 +1711,21 @@ else:
         # Получаем подсказки через функцию-хелпер, которая смотрит в SPECIFIC_HINTS
         ph = get_placeholder(var, selected_id)
         help_text = get_help(var, selected_id)
-        
-        # --- SPECIFIC LABEL OVERRIDES (Dynamic) ---
-        if selected_id == "mockup_generation":
-            if var == "image_1":
-                label = "Что наносим? (Лого/Картинка)"
-            if var == "object_type":
-                label = "На какой предмет наносим?"
-        if selected_id == "youtube_thumbnail":
-            if var == "object":
-                label = "Фото объекта / Референс"
 
-                # Подсказка в tooltip (значок ? рядом с полем)
-                extra_hint = "Загрузите фото главного объекта (человека/продукта) или опишите его словами. Чем конкретнее — тем лучше."
+        # UI overrides from prompts.json metadata (minimal decoupling)
+        if isinstance(ui_meta, dict):
+            label_overrides = ui_meta.get("label_overrides", {})
+            if isinstance(label_overrides, dict) and var in label_overrides:
+                label = str(label_overrides[var])
+
+            help_overrides = ui_meta.get("help_overrides", {})
+            if isinstance(help_overrides, dict) and var in help_overrides:
+                # Replace the base help text entirely for this field
+                help_text = str(help_overrides[var]) if help_overrides[var] is not None else help_text
+
+            help_append = ui_meta.get("help_append", {})
+            if isinstance(help_append, dict) and var in help_append and help_append[var]:
+                extra_hint = str(help_append[var])
                 help_text = (help_text + "\n\n" + extra_hint) if help_text else extra_hint
 
 
@@ -1091,14 +1740,14 @@ else:
                 continue
 
         # 2. ATTACHMENT (File / Link)
-        # Check specifically if it's image_1 for mockup to force file uploader
-        is_mockup_image = (selected_id == "mockup_generation" and var == "image_1")
-        
-        if is_attachment_var(var, selected_id) or is_mockup_image:
+        force_file_vars = []
+        if isinstance(ui_meta, dict):
+            force_file_vars = ui_meta.get("force_file_vars", []) or []
+        is_forced_file_var = isinstance(force_file_vars, list) and var in force_file_vars
+
+        if is_attachment_var(var, selected_id) or is_forced_file_var:
             col.markdown(f"**{label}**")
             # Default tab selection
-            d_src = field_default_src(var, selected_id) or "Ссылка / описание"
-            idx = 1 if (d_src == "Файл" or is_mockup_image) else 0
             
             tab_link, tab_file = col.tabs(["🔗 Ссылка / Текст", "📁 Файл"])
             
@@ -1134,20 +1783,25 @@ else:
 
                 if files:
                     ok_files = []
+                    ok_sizes = []
                     too_big = []
                     for f in files:
                         if not f:
                             continue
-                        size = getattr(f, "size", None)
-                        if not isinstance(size, int):
-                            try:
-                                size = len(f.getvalue() or b"")
-                            except Exception:
-                                size = 0
+                        size = _uploaded_file_size(f)
                         if size and size > UI_MAX_FILE_BYTES:
                             too_big.append((getattr(f, "name", "file"), int(size)))
                         else:
+                            # Validate file signature (do not trust extension alone)
+                            safe_name = _redact_filename(getattr(f, "name", "file"))
+                            if not _is_allowed_image_upload(f, IMAGE_FILE_EXTS):
+                                bad_files.append(f"{safe_name} — файл не похож на изображение PNG/JPG/WebP")
+                                continue
+                            if not _verify_image_upload(f):
+                                bad_files.append(f"{safe_name} — изображение повреждено или имеет неверный формат")
+                                continue
                             ok_files.append(f)
+                            ok_sizes.append(int(size or 0))
 
                     if too_big:
                         limit_mb = UI_MAX_FILE_BYTES / (1024 * 1024)
@@ -1156,6 +1810,8 @@ else:
 
                     if ok_files:
                         uploaded_files[var] = ok_files
+                        uploads_total_files += len(ok_files)
+                        uploads_total_bytes += sum(ok_sizes)
                         user_inputs[var] = "[ATTACHED]" if len(ok_files) > 1 else f"[FILE: {ok_files[0].name}]"
             if var not in user_inputs: user_inputs[var] = ""
 
@@ -1179,6 +1835,25 @@ else:
                 user_inputs[var] = col.text_input(label, key=widget_key, placeholder=ph, help=help_text)
 
 st.markdown("---")
+
+# Upload limits (across all attachment fields)
+uploads_ok = True
+if bad_files:
+    st.error("⚠️ Некоторые файлы отклонены:\n- " + "\n- ".join(bad_files))
+    uploads_ok = False
+if uploads_total_files > UI_MAX_UPLOAD_FILES:
+    st.error(
+        f"⚠️ Слишком много загруженных файлов: {uploads_total_files}. "
+        f"Максимум: {UI_MAX_UPLOAD_FILES}."
+    )
+    uploads_ok = False
+if uploads_total_bytes > UI_MAX_TOTAL_UPLOAD_BYTES:
+    st.error(
+        f"⚠️ Суммарный размер всех файлов: {format_bytes(uploads_total_bytes)}. "
+        f"Максимум: {format_bytes(UI_MAX_TOTAL_UPLOAD_BYTES)}."
+    )
+    uploads_ok = False
+
 neg_mode_ui = st.selectbox("Режим негатива:", ["light (Mini)", "medium (Default)", "hard (Aggressive)"], index=1, key="neg_mode_ui")
 
 # =========================================================
@@ -1190,6 +1865,10 @@ if st.button("🍌 Сгенерировать Промпт", use_container_width
     ctx = get_request_context()
     rec = get_usage_recorder()
     st.session_state["_nb_usage_counters"] = {"translate_calls": 0, "translate_chars": 0}
+
+    if not uploads_ok:
+        st.error("⚠️ Исправьте ошибки загрузки файлов (лимиты/размеры) и попробуйте снова.")
+        st.stop()
     if not enforce_usage_limits(ctx, UsageAction.GENERATE_PROMPT, units=1):
         # NOTE: allow-all today. In future SaaS mode, this becomes a quota gate.
         st.error("⚠️ Слишком много запросов. Попробуйте позже.")
@@ -1218,13 +1897,16 @@ if st.button("🍌 Сгенерировать Промпт", use_container_width
                 # 1. RU prompt generation
                 i_ru = normalize_special_vars(user_inputs, "ru")
                 
-                # 2. EN prompt generation (Translate values unless it's a file placeholder)
-                i_en = {}
-                for k,v in user_inputs.items():
-                    if str(v).startswith("[") and ("FILE" in str(v) or "ATTACHED" in str(v)):
-                        i_en[k] = v
-                    else:
-                        i_en[k] = safe_translate_to_en(str(v), k)
+                # 2. EN prompt generation
+                # Translate only where it makes sense; never hang UI; record any fallbacks.
+                i_en, translate_fallback_keys = translate_user_inputs_to_en(user_inputs)
+
+                if translate_fallback_keys:
+                    _add_run_notice(
+                        "Translation fallback was used for: " + ", ".join(sorted(set(translate_fallback_keys))) +
+                        ". EN prompt may contain non-English values.",
+                        level="warning",
+                    )
                 
                 i_en = normalize_special_vars(i_en, "en")
 
@@ -1333,13 +2015,20 @@ if st.button("🍌 Сгенерировать Промпт", use_container_width
                 )
                 if payload:
                     st.divider()
-                    st.json(payload)
+                    st.json(redact_payload_for_ui(payload))
             with t2:
                 st.info(f"**Positive:**\n{res_ru}")
                 st.warning(f"**Negative:**\n{neg_ru}")
 
         except Exception as e:
-            st.error(public_error_message(e, debug=getattr(cfg, "debug_errors", False)))
+            _store_last_generate_error(selected_id, e)
+            # Make common validation issues actionable without exposing sensitive data.
+            # ValueError messages in this app are crafted to be user-safe (e.g., missing fields,
+            # upload limits). Everything else keeps the generic message unless debug is enabled.
+            if isinstance(e, ValueError):
+                st.error(str(e))
+            else:
+                st.error(public_error_message(e, debug=getattr(cfg, "debug_errors", False)))
 
 # =========================================================
 # 9) HISTORY TAB

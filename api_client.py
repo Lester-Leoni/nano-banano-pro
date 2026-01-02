@@ -2,10 +2,18 @@ import os
 import json
 import base64
 import hashlib
+import ipaddress
 import urllib.request
 import urllib.error
+import urllib.parse
+from urllib.parse import urlparse, urljoin
+import logging
+import socket
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union, Tuple
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_api_config() -> Dict[str, Any]:
@@ -16,11 +24,114 @@ def get_api_config() -> Dict[str, Any]:
       - NANOBANANO_API_KEY (опционально)
       - NANOBANANO_TIMEOUT (сек), по умолчанию 30
     """
+    api_url_raw = (os.getenv("NANOBANANO_API_URL") or "").strip().rstrip("/")
+    api_url = _validate_base_url(api_url_raw)
+
     return {
-        "api_url": (os.getenv("NANOBANANO_API_URL") or "").strip().rstrip("/"),
+        "api_url": api_url,
         "api_key": (os.getenv("NANOBANANO_API_KEY") or "").strip(),
         "timeout": int(os.getenv("NANOBANANO_TIMEOUT") or "30"),
     }
+
+
+def _is_private_host(host: str) -> bool:
+    """SSRF guard.
+
+    Блокируем:
+      - localhost / *.localhost / *.local
+      - прямые IP-адреса из private/loopback/link-local/reserved диапазонов
+      - домены, которые DNS-резолвятся (A/AAAA) в любой private/loopback/link-local IP
+
+    Fail-safe: если DNS-резолв не удался, считаем хост небезопасным.
+    """
+    h = (host or "").strip().lower()
+    if not h:
+        return True
+    if h in {"localhost", "localhost."}:
+        return True
+    if h.endswith(".localhost") or h.endswith(".local"):
+        return True
+
+    def _is_blocked_ip(ip: ipaddress._BaseAddress) -> bool:  # type: ignore[attr-defined]
+        return bool(
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_link_local
+            or ip.is_reserved
+            or ip.is_multicast
+            or ip.is_unspecified
+        )
+
+    # Если это IP-адрес — блокируем private/loopback/link-local и т.п.
+    try:
+        ip = ipaddress.ip_address(h)
+        return _is_blocked_ip(ip)
+    except ValueError:
+        pass
+
+    # Если это домен — делаем DNS resolve и блокируем, если *любой* IP небезопасен.
+    try:
+        infos = socket.getaddrinfo(h, None, type=socket.SOCK_STREAM)
+    except OSError:
+        return True
+
+    resolved: set[str] = set()
+    for family, _, _, _, sockaddr in infos:
+        if family == socket.AF_INET:
+            resolved.add(sockaddr[0])
+        elif family == socket.AF_INET6:
+            resolved.add(sockaddr[0])
+
+    if not resolved:
+        return True
+
+    for ip_str in resolved:
+        try:
+            ip_obj = ipaddress.ip_address(ip_str)
+        except ValueError:
+            continue
+        if _is_blocked_ip(ip_obj):
+            return True
+
+    return False
+
+
+def _validate_base_url(base_url: str) -> str:
+    """Строгая валидация базового URL API.
+
+    - По умолчанию разрешаем только https
+      (http допускается только если NANOBANANO_ALLOW_INSECURE_HTTP=1)
+    - Запрещаем пустой host
+    - Запрещаем локальные/приватные хосты (SSRF guard)
+    """
+    base_url = (base_url or "").strip().rstrip("/")
+    if not base_url:
+        return ""
+
+    parsed = urllib.parse.urlparse(base_url)
+    allow_http = os.getenv("NANOBANANO_ALLOW_INSECURE_HTTP", "").strip().lower() in {"1", "true", "yes"}
+    if parsed.scheme not in {"https", "http"}:
+        raise ValueError("NANOBANANO_API_URL: разрешены только https (и http только при NANOBANANO_ALLOW_INSECURE_HTTP=1)")
+    if parsed.scheme == "http" and not allow_http:
+        raise ValueError("NANOBANANO_API_URL: http запрещён по умолчанию (включи NANOBANANO_ALLOW_INSECURE_HTTP=1 если осознанно)")
+    if parsed.username or parsed.password:
+        raise ValueError("NANOBANANO_API_URL: userinfo в URL запрещён")
+    if not parsed.hostname:
+        raise ValueError("NANOBANANO_API_URL: отсутствует hostname")
+    if _is_private_host(parsed.hostname):
+        raise ValueError("NANOBANANO_API_URL: запрещён локальный/приватный host")
+
+    # Нормализуем (без лишнего / на конце)
+    return urllib.parse.urlunparse(
+        (
+            parsed.scheme,
+            parsed.netloc,
+            parsed.path.rstrip("/"),
+            "",
+            "",
+            "",
+        )
+    )
 
 
 def _read_bytes(uploaded_file) -> bytes:
@@ -91,24 +202,88 @@ class NanoBananoAPIClient:
 
     def post_json(self, path: str, payload: Dict[str, Any]) -> Dict[str, Any]:
         url = self.api_url.rstrip("/") + (path if path.startswith("/") else "/" + path)
+
+        allow_http = os.getenv("NANOBANANO_ALLOW_INSECURE_HTTP", "").strip().lower() in {"1", "true", "yes"}
+
+        def _validate_request_url(u: str) -> None:
+            # Validate immediately before any network I/O (best-effort DNS rebinding mitigation).
+            parsed = urlparse(u)
+            if parsed.scheme not in {"https", "http"}:
+                raise RuntimeError("Invalid API URL scheme")
+            if parsed.scheme == "http" and not allow_http:
+                raise RuntimeError("Insecure http is not allowed")
+            if parsed.username or parsed.password:
+                raise RuntimeError("Invalid API URL userinfo")
+            host = parsed.hostname
+            if not host:
+                raise RuntimeError("Invalid API URL host")
+            if _is_private_host(host):
+                raise RuntimeError("Blocked private/loopback API host")
+
+        # Disable automatic redirects and re-validate each redirect target.
+        class _NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[override]
+                return None
+
+        opener = urllib.request.build_opener(_NoRedirect())
+
         data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        req = urllib.request.Request(url, data=data, headers=self._headers(), method="POST")
+        method: str = "POST"
+        body: Optional[bytes] = data
+        headers = self._headers()
+
+        current_url = url
+        max_redirects = 5
         try:
-            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                raw = resp.read().decode("utf-8", errors="ignore")
+            for _ in range(max_redirects + 1):
+                req = urllib.request.Request(current_url, data=body, headers=headers, method=method)
                 try:
-                    return json.loads(raw) if raw else {"ok": True}
-                except Exception:
-                    return {"ok": True, "raw": raw}
+                    # Validate immediately before any network I/O (best-effort DNS rebinding mitigation).
+                    _validate_request_url(current_url)
+                    with opener.open(req, timeout=self.timeout) as resp:
+                        raw = resp.read().decode("utf-8", errors="ignore")
+                        try:
+                            return json.loads(raw) if raw else {"ok": True}
+                        except Exception:
+                            return {"ok": True, "raw": raw}
+                except urllib.error.HTTPError as e:
+                    # Handle redirects safely (validate each target before following).
+                    code = getattr(e, "code", None)
+                    if code in {301, 302, 303, 307, 308}:
+                        location = (e.headers.get("Location") or "").strip()
+                        if not location:
+                            raise
+                        next_url = urljoin(current_url, location)
+                        _validate_request_url(next_url)
+
+                        # Emulate urllib redirect semantics for POST.
+                        if code in {301, 302, 303} and method != "HEAD":
+                            method = "GET"
+                            body = None
+                        current_url = next_url
+                        continue
+                    raise
+            raise RuntimeError("API request failed (too many redirects).")
         except urllib.error.HTTPError as e:
-            body = ""
+            status = getattr(e, "code", None)
+            reason = getattr(e, "reason", "")
+            body_len = 0
             try:
-                body = e.read().decode("utf-8", errors="ignore")
+                raw = e.read() or b""
+                body_len = len(raw)
             except Exception:
-                pass
-            raise RuntimeError(f"HTTP {e.code}: {body or e.reason}")
+                body_len = 0
+            logger.warning(
+                "API request failed: HTTP %s %s url=%s body_len=%s",
+                status,
+                reason,
+                url,
+                body_len,
+            )
+            raise RuntimeError(f"API request failed (HTTP {status}).")
         except urllib.error.URLError as e:
-            raise RuntimeError(f"Network error: {e}")
+            logger.warning("API request failed: network error url=%s err=%r", url, e)
+            raise RuntimeError("API request failed (network error).")
 
 
 # -----------------------------
