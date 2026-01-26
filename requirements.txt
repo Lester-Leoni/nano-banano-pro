@@ -3,6 +3,6 @@
 # NOTE: This file keeps runtime deps minimal. Optional dependencies are in
 # requirements-optional.txt.
 
-streamlit==1.52.2
+streamlit==1.53.1
 
 deep-translator==1.11.4
